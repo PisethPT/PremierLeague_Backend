@@ -21,6 +21,7 @@ public static class DependenciesConfig
         builder.Services.AddScoped<IGoalRepository, GoalRepository>();
         builder.Services.AddScoped<ILineupRepository, LineupRepository>();
         builder.Services.AddScoped<IPlayerStatRepository, PlayerStatRepository>();
+        builder.Services.AddScoped<IMatchEventRepository, MatchEventRepository>();
 
         // select list item
         builder.Services.AddScoped<ISelectListItems, SelectListItems>();

@@ -3,29 +3,46 @@ using PremierLeague_Backend.Data.Repositories.Interfaces;
 using PremierLeague_Backend.Helper;
 using PremierLeague_Backend.Models.DTOs;
 using PremierLeague_Backend.Services.Interfaces;
-using static PremierLeague_Backend.Helper.SqlCommands.PlayerStatCommand;
+using static PremierLeague_Backend.Helper.SqlCommands.MatchEventCommands;
 
 namespace PremierLeague_Backend.Data.Repositories.Implementations;
 
-public class PlayerStatRepository : IPlayerStatRepository
+public class MatchEventRepository : IMatchEventRepository
 {
     private readonly IExecute execute;
 
-    public PlayerStatRepository(IExecute execute)
+    public MatchEventRepository(IExecute execute)
     {
         this.execute = execute;
     }
-    public Task<bool> AddPlayerStatAsync(PlayerStatDto playerStatDto)
+
+    public async Task<bool> AddMatchEventAsync(MatchEventDto matchEventDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = AddMatchEventCommand;
+            cmd.Parameters.AddWithValue("@MatchId", matchEventDto.MatchId);
+            cmd.Parameters.AddWithValue("@PlayerId", matchEventDto.PlayerId);
+            cmd.Parameters.AddWithValue("@ClubId", matchEventDto.ClubId);
+            cmd.Parameters.AddWithValue("@RelatedEventId", matchEventDto.RelatedEventId);
+            cmd.Parameters.AddWithValue("@EventTypeId", matchEventDto.EventTypeId);
+            cmd.Parameters.AddWithValue("@OutcomeId", matchEventDto.OutcomeId);
+            cmd.Parameters.AddWithValue("@Minute", matchEventDto.Minute);
+            cmd.Parameters.AddWithValue("@IsPenalty", matchEventDto.IsPenalty);
+            cmd.Parameters.AddWithValue("@IsOwnGoal", matchEventDto.IsOwnGoal);
+            cmd.Parameters.AddWithValue("@IsInSideBox", matchEventDto.IsInsideBox);
+            cmd.Parameters.AddWithValue("@IsBigChance", matchEventDto.IsBigChance);
+            cmd.Parameters.AddWithValue("@IsWoodwork", matchEventDto.IsWoodwork);
+
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }catch(SqlException ex)
+        {
+            throw new Exception($"Database error while adding match event: {ex.Message}", ex);
+        }
     }
 
-    public Task<bool> DeletePlayerStatAsync(int playerStatId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<PlayerStatDto> FindPlayerStatByIdAsync(int playerStatId, CancellationToken ct = default)
+    public Task<bool> DeleteMatchEventAsync(int matchEventId)
     {
         throw new NotImplementedException();
     }
@@ -104,29 +121,24 @@ public class PlayerStatRepository : IPlayerStatRepository
         }
     }
 
-    public Task<PlayerStatDetailDto> GetPlayerStatDetailDtoAsync(int matchId, int clubId, int playerId, CancellationToken ct = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<IEnumerable<PlayerStatMatchListDto>> GetPlayerStatMatchListAsync(int? seasonId, int week, int? page = 1, int? competitionId = 1, string? clubIdJson = null, CancellationToken ct = default)
+    public async Task<IEnumerable<MatchEventDuringMatchWeekDto>> GetMatchEventDuringMatchWeekAsync(int? seasonId, int week, int? page = 1, int? competitionId = 1, string? clubIdJson = null, CancellationToken ct = default)
     {
         try
         {
             var cmd = new SqlCommand();
-            cmd.CommandText = GetPlayerStatMatchListCommand;
+            cmd.CommandText = GetMatchDuringMatchWeekCommand;
             cmd.Parameters.AddWithValue("@Page", page);
             cmd.Parameters.AddWithValue("@SeasonId", seasonId);
             cmd.Parameters.AddWithValue("@Week", week);
             cmd.Parameters.AddWithValue("@CompetitionId", competitionId);
             cmd.Parameters.AddWithValue("@ClubIdJson", clubIdJson ?? (object)DBNull.Value);
             var rdr = await execute.ExecuteReaderAsync(cmd);
-            var playerStatMatchList = new List<PlayerStatMatchListDto>();
+            var matchEventDuringMatchWeek = new List<MatchEventDuringMatchWeekDto>();
             if (rdr is not null)
             {
                 do
                 {
-                    playerStatMatchList.Add(new PlayerStatMatchListDto
+                    matchEventDuringMatchWeek.Add(new MatchEventDuringMatchWeekDto
                     (
                         MatchId: rdr.SafeGetInt("MatchId"),
                         MatchDate: rdr.SafeGetString("MatchDate"),
@@ -149,45 +161,43 @@ public class PlayerStatRepository : IPlayerStatRepository
                     ));
                 } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
             }
-            return playerStatMatchList;
+            return matchEventDuringMatchWeek;
         }
         catch (SqlException ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception($"Database error while fetching match during match week: {ex.Message}", ex);
         }
     }
 
-    public async Task<IEnumerable<PlayerStatGetStatsByCategoryDto>> GetStatByIdForPlayerStatAsync(int statId, CancellationToken ct = default)
+    public async Task<IEnumerable<MatchEventTypesDto>> GetMatchEventTypesAsync(int? matchId, CancellationToken ct = default)
     {
         try
         {
             var cmd = new SqlCommand();
-            cmd.CommandText = GetStatByIdForPlayerStatCommand;
-            cmd.Parameters.AddWithValue("@StatId", statId);
+            cmd.CommandText = GetMatchEventTypesCommand;
+            cmd.Parameters.AddWithValue("@MatchId", matchId);
             var rdr = await execute.ExecuteReaderAsync(cmd);
-            var players = new List<PlayerStatGetStatsByCategoryDto>();
+            var matchEventTypes = new List<MatchEventTypesDto>();
             if (rdr is not null)
             {
                 do
                 {
-                    players.Add(new PlayerStatGetStatsByCategoryDto(
-                        StatId: rdr.SafeGetInt("StatId"),
-                        StatName: rdr.SafeGetString("StatName"),
-                        Symbol: rdr.SafeGetString("Symbol"),
-                        IsPlayerStat: rdr.SafeGetBoolean("IsPlayerStat"),
-                        IsClubStat: rdr.SafeGetBoolean("IsClubStat")
-                    ));
+                    matchEventTypes.Add(new MatchEventTypesDto
+                    {
+                        MatchEventId = rdr.SafeGetInt("MatchEventId"),
+                        MatchEventTypeName = rdr.SafeGetString("MatchEventTypeName")
+                    });
                 } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
             }
-            return players;
+            return matchEventTypes;
         }
         catch (SqlException ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception($"Database error while fetching match event types: {ex.Message}", ex);
         }
     }
 
-    public Task<bool> UpdatePlayerStatAsync(int playerStatId, PlayerStatDto playerStatDto)
+    public Task<bool> UpdateMatchEventAsync(int matchEventId, MatchEventDto matchEventDto)
     {
         throw new NotImplementedException();
     }

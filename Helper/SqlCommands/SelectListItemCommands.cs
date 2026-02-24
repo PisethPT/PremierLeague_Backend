@@ -19,4 +19,8 @@ public static class SelectListItemCommands
     public static string CommandSelectListItemStatsCommandText => "PL_CommandSelectListItemStats";
     public static string CommandSelectListItemStatCategoriesForMatchKickoffCommandText => "PL_CommandSelectListItemStatCategoriesForMatchKickoff";
     public static string CommandSelectListItemStatScopeCommandText => "PL_CommandSelectListItemStatScope";
+
+    // Match Event Select List Items
+    public static string CommandSelectListItemMatchEventOutcome => "PL_SelectListItemMatchEventOutcome";
+    public static string CommandSelectListItemMatchEventType => "PL_SelectListItemMatchEventType";
 }

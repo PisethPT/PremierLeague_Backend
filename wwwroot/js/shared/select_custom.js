@@ -1,10 +1,18 @@
 export const CustomSelect = (function () {
-  // helper: build option object from <option> element
   const optFromEl = (optEl) => ({
     value: optEl.value,
     label: optEl.textContent.trim(),
+    text: optEl.textContent.trim(),
     img: optEl.dataset.img || null,
     subtitle: optEl.dataset.sub || optEl.dataset.subtitle || "",
+  });
+
+  const normalizeOption = (it) => ({
+    value: it.value,
+    label: it.label ?? it.text ?? "",
+    text: it.text ?? it.label ?? "",
+    img: it.img ?? null,
+    subtitle: it.subtitle ?? "",
   });
 
   const defaults = {
@@ -16,8 +24,12 @@ export const CustomSelect = (function () {
   };
 
   function escapeHtml(s) {
-    if (!s) return "";
-    return s.replace(
+    if (s === null || s === undefined) return "";
+    if (typeof s === "object") {
+      s = JSON.stringify(s);
+    }
+
+    return String(s).replace(
       /[&<>"']/g,
       (m) =>
         ({
@@ -34,10 +46,9 @@ export const CustomSelect = (function () {
     const wrapper = document.createElement("label");
     wrapper.className = "flex flex-col gap-2 relative";
 
-    // hide original select
-    select.classList.add("hidden");
+    select.classList.add("hidden"); // hide original select
 
-    // button
+    // Button
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className =
@@ -48,7 +59,6 @@ export const CustomSelect = (function () {
     const left = document.createElement("div");
     left.className = "flex items-center gap-3 min-w-0";
 
-    // button image (uses cfg.imgSize!)
     const img = document.createElement("img");
     img.className = `${cfg.imgSize} object-cover flex-shrink-0 hidden`;
     img.alt = "";
@@ -67,7 +77,7 @@ export const CustomSelect = (function () {
     btn.appendChild(left);
     btn.appendChild(arrow);
 
-    // panel
+    // Panel
     const panel = document.createElement("div");
     panel.className =
       "hidden absolute !mt-[45px] w-full bg-[#55005a] border border-[#430044] rounded-lg shadow-lg z-50 overflow-hidden";
@@ -138,7 +148,6 @@ export const CustomSelect = (function () {
   function Instance(selectEl, options = {}) {
     const cfg = Object.assign({}, defaults, options);
 
-    // override from data attributes if present
     if (selectEl.dataset.placeholder)
       cfg.placeholder = selectEl.dataset.placeholder;
     if (selectEl.dataset.showImage !== undefined)
@@ -148,8 +157,10 @@ export const CustomSelect = (function () {
     const nodes = createNode(selectEl, cfg);
     const { btn, panel, input, ul, img, labelSpan, hiddenSelect } = nodes;
 
-    // initial items
-    let items = Array.from(hiddenSelect.options).map(optFromEl);
+    let items = Array.from(hiddenSelect.options)
+      .map(optFromEl)
+      .map(normalizeOption); // normalize both label & text
+
     let filtered = items.slice();
     let focused = -1;
     let open = false;
@@ -158,6 +169,7 @@ export const CustomSelect = (function () {
       hiddenSelect.selectedIndex >= 0
         ? items[hiddenSelect.selectedIndex]
         : null;
+
     if (selected) {
       labelSpan.textContent = selected.label;
       if (cfg.showImage && selected.img) {
@@ -189,15 +201,17 @@ export const CustomSelect = (function () {
       renderList(ul, filtered, cfg, selected ? selected.value : null);
       focused = -1;
     }
+
     function filter(q) {
       const Q = q.trim().toLowerCase();
       filtered = items.filter(
         (it) =>
-          it.label.toLowerCase().includes(Q) ||
+          (it.label || "").toLowerCase().includes(Q) ||
           (it.subtitle || "").toLowerCase().includes(Q),
       );
       renderList(ul, filtered, cfg, selected ? selected.value : null);
     }
+
     function highlight() {
       const nodes = ul.querySelectorAll("li");
       nodes.forEach((n, i) => {
@@ -285,7 +299,14 @@ export const CustomSelect = (function () {
         return true;
       },
       updateOptions(newOptions) {
-        items = newOptions.slice();
+        const emptyOption = {
+          value: "",
+          label: cfg.placeholder || "Select",
+          img: null,
+          subtitle: "",
+        };
+
+        items = [emptyOption, ...newOptions.map(normalizeOption)];
         hiddenSelect.innerHTML = items
           .map((it) => {
             const o = document.createElement("option");
@@ -296,10 +317,12 @@ export const CustomSelect = (function () {
             return o.outerHTML;
           })
           .join("");
+
         filtered = items.slice();
         selected = items.find((x) => x.value === hiddenSelect.value) || null;
         renderList(ul, filtered, cfg, selected ? selected.value : null);
-        if (!selected) {
+
+        if (!selected || selected.value === "") {
           labelSpan.textContent = cfg.placeholder;
           img.classList.add("hidden");
         }

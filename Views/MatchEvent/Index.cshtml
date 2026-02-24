@@ -1,0 +1,544 @@
+﻿@using PremierLeague_Backend.Models.DTOs
+@using PremierLeague_Backend.Models.ViewModels
+@model MatchEventViewModel
+@{
+    ViewData["Title"] = "Match Events";
+    int index = 0;
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="bg-red-100 border-red-700 text-red-700 px-4 py-2 rounded-t-lg mb-4 flex justify-between transition-all duration-300"
+         id="errorAlertPanel">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+        <div class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer">
+            <button onclick="closeAlertPanel('errorAlertPanel')" class="text-red-700">✕</button>
+        </div>
+    </div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="bg-[#8a3fbf] text-white px-4 py-2 rounded-t-lg mb-4 flex justify-between items-center transition-all duration-300 hover:ring-2 hover:!ring-[#8a3fbf]"
+         id="infoAlertPanel">
+        <span>@TempData["SuccessMessage"]</span>
+        <div class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer">
+            <button onclick="closeAlertPanel('infoAlertPanel')" class="text-white">✕</button>
+        </div>
+    </div>
+}
+
+<div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden">
+    <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-4 w-full">
+        <div class="flex items-center justify-between lg:justify-start gap-4">
+            <a href="@Url.Action("Index", "Season")"
+                   class="inline-block bg-[#55005a] text-white px-4 py-2 hover:bg-[#410544] rounded-lg transition hover:ring-2 hover:!ring-[#8a3fbf] text-nowrap">
+                Back
+                to
+                Home
+            </a>
+
+            <button onclick="openModal('modal-8xl', true)"
+                    class="inline-block bg-[#8a3fbf] hover:bg-[#6b2fa0] text-white px-4 py-2 rounded-lg transition hover:ring-2 hover:!ring-[#8a3fbf] text-nowrap"
+                    id="btnAddNewSeason">
+                Add New
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="modalBackdrop" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
+
+<div id="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center m-4">
+    <div id="modalBox" class="bg-[#1e0021] rounded-2xl shadow-xl p-6 transition-all duration-300 scale-90 opacity-0"
+         onclick="event.stopPropagation()">
+
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-white" id="modalTitle">Create New Match Events</h2>
+            <button onclick="closeModal()"
+                    class="bg-[#55005a] text-white flex items-center justify-center w-8 h-8 rounded-full hover:bg-[#410544] cursor-pointer hover:ring-2 hover:!ring-[#8a3fbf]">
+                <i class="fa-solid fa-xmark text-white"></i>
+            </button>
+        </div>
+
+        <form id="matchEventForm" asp-controller="MatchEvent" asp-action="Create" method="post" asp-antiforgery="true"
+              class="h-auto p-2" enctype="multipart/form-data" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="matchEventId" asp-for="MatchEventDto.MatchEventId" />
+            <input type="hidden" id="matchId" asp-for="MatchEventDto.MatchId" />
+            <input type="hidden" id="clubId" asp-for="MatchEventDto.ClubId" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 h-fit">
+                <div class="grid grid-rows-1 md:grid-rows-2 xl:grid-rows-2 gap-4 h-fit">
+                    <label class="flex flex-col gap-2">
+                        <span class="flex items-center gap-1">
+                            <span class="text-white font-medium">Event Types</span>
+                            <span class="text-red-400">*</span>
+                        </span>
+                        <select id="eventTypeSelect" class="js-custom-select" asp-for="MatchEventDto.EventTypeId"
+                                asp-items="Model.MatchEventTypesSelectListItem" required>
+                            <option value="">Select EventType</option>
+                        </select>
+                        <span asp-validation-for="MatchEventDto.EventTypeId" class="text-red-400 text-sm"
+                              id="eventTypeId-validation"></span>
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="flex items-center gap-1">
+                            <span class="text-white font-medium">Outcomes</span>
+                            <span class="text-red-400">*</span>
+                        </span>
+                        <select id="outcomeSelect" class="js-custom-select" asp-for="MatchEventDto.OutcomeId"
+                                asp-items="Model.MatchEventOutcomesSelectListItem" required>
+                            <option value="">Select Outcome</option>
+                        </select>
+                        <span asp-validation-for="MatchEventDto.OutcomeId" class="text-red-400 text-sm"
+                              id="outcomeId-validation"></span>
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="flex items-center gap-1">
+                            <span class="text-white font-medium">Related Event</span>
+                        </span>
+                        <select id="relatedEventSelect" class="js-custom-select" data-show-image="true"
+                                asp-for="MatchEventDto.RelatedEventId">
+                            <option value="">Related Event</option>
+                        </select>
+                    </label>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <label class="flex flex-col gap-2 w-fit">
+                            <span class="flex items-center gap-1">
+                                <span class="text-white font-medium">Penalty</span>
+                            </span>
+                            <div class="flex items-center gap-4">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="isPenalty" type="checkbox" class="sr-only peer" />
+                                    <input id="isPenaltyHidden" type="hidden" name="MatchEventDto.IsPenalty"
+                                           value="false" />
+                                    <div
+                                        class="w-12 h-6 bg-[#55005a] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#8a3fbf] rounded-full peer-checked:bg-[#8a3fbf] transition-colors">
+                                    </div>
+
+                                    <div
+                                        class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6">
+                                    </div>
+                                </label>
+
+                                <span id="isPenaltyLabel" class="text-sm text-gray-300">
+                                    @(Model.MatchEventDto.IsPenalty ? "Yes" : "No")
+                                </span>
+                            </div>
+                        </label>
+                    
+                        <label class="flex flex-col gap-2 w-fit">
+                            <span class="flex items-center gap-1">
+                                <span class="text-white font-medium">OwnGoal</span>
+                            </span>
+                            <div class="flex items-center gap-4">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="isOwnGoal" type="checkbox" class="sr-only peer" />
+                                    <input id="isOwnGoalHidden" type="hidden" name="MatchEventDto.IsOwnGoal"
+                                           value="false" />
+                                    <div
+                                        class="w-12 h-6 bg-[#55005a] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#8a3fbf] rounded-full peer-checked:bg-[#8a3fbf] transition-colors">
+                                    </div>
+
+                                    <div
+                                        class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6">
+                                    </div>
+                                </label>
+
+                                <span id="isOwnGoalLabel" class="text-sm text-gray-300">
+                                    @(Model.MatchEventDto.IsOwnGoal ? "Yes" : "No")
+                                </span>
+                            </div>
+                        </label>
+
+                        <label class="flex flex-col gap-2 w-fit">
+                            <span class="flex items-center gap-1">
+                                <span class="text-white font-medium">InsideBox</span>
+                            </span>
+                            <div class="flex items-center gap-4">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="isInsideBox" type="checkbox" class="sr-only peer" />
+                                    <input id="isInsideBoxHidden" type="hidden" name="MatchEventDto.IsInsideBox"
+                                           value="false" />
+                                    <div
+                                        class="w-12 h-6 bg-[#55005a] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#8a3fbf] rounded-full peer-checked:bg-[#8a3fbf] transition-colors">
+                                    </div>
+
+                                    <div
+                                        class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6">
+                                    </div>
+                                </label>
+
+                                <span id="isInsideBoxLabel" class="text-sm text-gray-300">
+                                    @(Model.MatchEventDto.IsInsideBox ? "Yes" : "No")
+                                </span>
+                            </div>
+                        </label>
+
+                        <label class="flex flex-col gap-2 w-fit">
+                            <span class="flex items-center gap-1">
+                                <span class="text-white font-medium">BigChance</span>
+                            </span>
+                            <div class="flex items-center gap-4">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="isBigChance" type="checkbox" class="sr-only peer" />
+                                    <input id="isBigChanceHidden" type="hidden" name="MatchEventDto.IsBigChance"
+                                           value="false" />
+                                    <div
+                                        class="w-12 h-6 bg-[#55005a] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#8a3fbf] rounded-full peer-checked:bg-[#8a3fbf] transition-colors">
+                                    </div>
+
+                                    <div
+                                        class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6">
+                                    </div>
+                                </label>
+
+                                <span id="isBigChanceLabel" class="text-sm text-gray-300">
+                                    @(Model.MatchEventDto.IsBigChance ? "Yes" : "No")
+                                </span>
+                            </div>
+                        </label>
+
+                        <label class="flex flex-col gap-2 w-fit">
+                            <span class="flex items-center gap-1">
+                                <span class="text-white font-medium">Woodwork</span>
+                            </span>
+                            <div class="flex items-center gap-4">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="isWoodwork" type="checkbox" class="sr-only peer" />
+                                    <input id="isWoodworkHidden" type="hidden" name="MatchEventDto.IsWoodwork"
+                                           value="false" />
+                                    <div
+                                        class="w-12 h-6 bg-[#55005a] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#8a3fbf] rounded-full peer-checked:bg-[#8a3fbf] transition-colors">
+                                    </div>
+
+                                    <div
+                                        class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6">
+                                    </div>
+                                </label>
+
+                                <span id="isWoodworkLabel" class="text-sm text-gray-300">
+                                    @(Model.MatchEventDto.IsWoodwork ? "Yes" : "No")
+                                </span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="grid grid-rows-1 md:grid-rows-[auto_auto] xl:grid-rows-[auto_auto] h-fit gap-4">
+                    <label id="isPlayerLabel" class="flex flex-col gap-2">
+                        <span class="flex items-center gap-1">
+                            <span class="text-white font-medium">Players</span>
+                            <span class="text-red-400">*</span>
+                        </span>
+                        <select id="playerSelect" class="js-custom-select" data-show-image="true"
+                                asp-for="MatchEventDto.PlayerId" required>
+                            <option value="">Select Players</option>
+                        </select>
+                        <span asp-validation-for="MatchEventDto.PlayerId" class="text-red-400 text-sm"
+                              id="playerId-validation"></span>
+                    </label>
+
+                    <div class="grid grid-cols-1 md:grid-cols-[150px_auto] xl:grid-cols-[150px_auto] items-start gap-4">
+                        <label class="flex flex-col gap-2">
+                            <span class="flex items-center gap-1">
+                                <span id="valueLabelId" class="text-white font-medium">Minute</span>
+                                <span class="text-red-400">*</span>
+                            </span>
+                            <input id="minuteId" asp-for="MatchEventDto.Minute" type="text" placeholder="e.g. 45+2"
+                                   pattern="^([0-9]{1,3})(\+[0-9]{1,2})?$" class="bg-[#55005a] text-white placeholder:text-gray-400 rounded-lg px-4 py-2 w-full
+                            focus:outline-none focus:ring-2 focus:ring-[#8a3fbf]" required/>
+                            <span asp-validation-for="MatchEventDto.Minute" class="text-red-400 text-sm"
+                                  id="minuteId-validation"></span>
+                        </label>
+
+                        <label id="previewSection" class="hidden flex-col gap-2">
+                            <span class="flex items-center gap-1">
+                                <span id="previewLabelId" class="text-white font-medium">Player Preview</span>
+                            </span>
+                            <div id="clubTheme" class="flex flex-col gap-1 rounded-2xl pt-4 px-4 overflow-hidden"
+                                 style="background-color: #ff0000;">
+                                <div class="flex flex-col gap-1">
+                                    <span id="playerFirstName" class="text-white text-lg font-normal">N/A</span>
+                                    <span id="playerLastName" class="text-white text-xl font-bold">N/A</span>
+                                    <span id="playerPosition" class="text-white text-lg font-normal">N/A</span>
+                                    <button
+                                        class="bg-[#ffffff2b] text-white text-center text-sm px-3 py-1 rounded-2xl w-fit text-nowrap whitespace-nowrap">View
+                                        stats <i class="fas fa-chevron-right !text-[8px]"></i>
+                                    </button>
+                                    
+                                </div>
+                                <div class="flex justify-between items-end gap-1 h-full">
+                                    <div class="flex flex-col justify-center gap-4">
+                                        <div class="flex mt-3">
+                                            <img id="clubCrest" src="/upload/clubs/ars.png"
+                                                 class="w-auto h-16 object-contain" />
+                                        </div>
+                                        <span id="playerNumber" class="text-white text-4xl font-bold mb-4">N/A</span>
+                                    </div>
+                                    <img id="playerPhoto" src="/upload/players/placeholder.png"
+                                         class="w-auto h-48 object-contain cursor-pointer" />
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex flex-col md:flex-row justify-between gap-3">
+                <div class="text-sm text-gray-200/80">Fields with <span class="text-red-400">*</span> are required.
+                </div>
+                <div class="flex gap-3">
+                    <button type="reset" id="resetBtn"
+                            class="text-white px-4 py-2 bg-[#410544] rounded-lg hover:bg-[#55005a] transition hover:ring-2 hover:!ring-[#8a3fbf]">Reset</button>
+                    <button type="submit"
+                            class="text-white px-4 py-2 bg-[#8a3fbf] rounded-lg hover:bg-[#6b2fa0] transition hover:ring-2 hover:!ring-[#8a3fbf]">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
+    <div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden h-fit max-h-[83vh]">
+        <h2 class="text-white text-md font-semibold uppercase">During Matches</h2>
+        <div class="overflow-y-auto overflow-x-auto max-h-[78vh] scrollbar-none overflow-hidden rounded-t-lg">
+            <table class="min-w-full divide-y divide-[#55005a]">
+                <thead class="bg-[#55005a] sticky top-0 z-10">
+                    <tr>
+                        <th class="px-1 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">
+                            ID
+                        </th>
+                        <th
+                            class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center text-nowrap">
+                            Home Club
+                        </th>
+                        <th
+                            class="px-auto py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                            Match Info
+                        </th>
+                        <th
+                            class="px-1 py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                            Away Club
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-transparent divide-y divide-[#55005a]">
+                    @foreach (var match in Model.MatchEventDuringMatchWeekDtos)
+                    {
+                        index++;
+                        <tr class="cursor-pointer">
+                            <td class="px-1 py-4 whitespace-nowrap text-sm text-white">
+                                <div class="flex justify-center items-center">
+                                    <div
+                                        class="w-8 h-8 text-white text-sm font-bold text-center flex justify-center items-center bg-[#c] rounded-full ring-2 !ring-[#8a3fbf]">
+                                        @index
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
+                                <div class="flex justify-start items-center flex-col gap-1">
+                                    <div style="background-color: @match.HomeClubTheme"
+                                         class="flex justify-center items-center w-14 h-14 shadow rounded-2xl overflow-hidden !p-[4px]">
+                                        <img src="~/upload/clubs/@match.HomeClubCrest"
+                                             class="max-w-full max-h-full object-contain cursor-pointer" />
+                                    </div>
+                                    <span class="text-white text-center text-sm font-semibold">@match.HomeClubName</span>
+                                    <div class="flex justify-center items-center gap-1 cursor-pointer">
+                                        <div class="bg-[#8e07ee] flex justify-center items-center w-4 h-4 rounded-full">
+                                            <span class="text-white !text-[11px] font-bold">+</span>
+                                        </div>
+                                        <button onclick="toggleAddMatchEvent(@match.MatchId, @match.HomeClubId, true)"
+                                                class="text-[#8e07ee] text-center text-sm font-thin hover:underline">
+                                            Add
+                                            events
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
+                                <div class="flex justify-start items-center flex-col gap-2">
+                                    <div
+                                        class="bg-[#8a3fbf] flex justify-center items-center flex-col w-fit px-4 py-1 rounded-md">
+                                        <span
+                                        class="text-white text-center text-xl font-semibold">@match.HomeClubGoal-@match.AwayClubGoal</span>
+                                        <span class="text-white text-center text-[9px] font-bold">@match.MatchStatus</span>
+                                    </div>
+                                    <span class="text-white text-center text-md font-bold">@match.MatchDate</span>
+                                    <span class="text-gray-400 text-center text-sm font-thin">
+                                        @match.MatchTime •
+                                        @match.KickoffStadium
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
+                                <div class="flex justify-end items-center flex-col gap-1">
+                                    <div style="background-color: @match.AwayClubTheme"
+                                         class="flex justify-center items-center w-14 h-14 shadow rounded-2xl overflow-hidden !p-[4px]">
+                                        <img src="~/upload/clubs/@match.AwayClubCrest"
+                                             class="max-w-full max-h-full object-contain cursor-pointer" />
+                                    </div>
+                                    <span class="text-white text-center text-sm font-semibold">@match.AwayClubName</span>
+                                    <div class="flex justify-center items-center gap-1 cursor-pointer">
+                                        <div class="bg-[#8e07ee] flex justify-center items-center w-4 h-4 rounded-full">
+                                            <span class="text-white !text-[11px] font-bold">+</span>
+                                        </div>
+                                        <button onclick="toggleAddMatchEvent(@match.MatchId, @match.AwayClubId, false)"
+                                                class="text-[#8e07ee] text-center text-sm font-thin hover:underline">
+                                            Add
+                                            events
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden h-fit max-h-[86vh]">
+        <h2 class="text-white text-md font-semibold uppercase">Match Event Types</h2>
+        <div class="flex flex-col gap-2 overflow-y-auto max-h-[76.5vh] scrollbar-none overflow-hidden rounded-t-lg">
+            <!-- Top Stats -->
+            <div class="accordion-item">
+                <div onclick="toggleAccordion(this)"
+                     class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
+                    <span class="text-xs font-medium text-white uppercase tracking-wider">Top Stats</span>
+                    <div class="flex items-center justify-center rounded-full bg-[#37003c] w-6 h-6">
+                        <i class="fa-solid fa-chevron-down text-white text-xs transition-transform duration-300"></i>
+                    </div>
+                </div>
+
+                <div class="accordion-content overflow-hidden max-h-0 transition-all duration-300 ">
+                    <div class="flex flex-col gap-2 justify-center mt-3">
+                        <span class="text-white text-center">Possession</span>
+                        <div class="flex justify-between w-full h-7 rounded-lg overflow-hidden">
+                            <div class="bg-white w-[54.9%] flex justify-start px-3 text-black font-bold">54.9%</div>
+                            <div class="bg-[#7ab2e1] w-[45.1%] flex justify-end px-3 text-white font-bold">45.1%</div>
+                        </div>
+                    </div>
+
+                    <div class="divide-y divide-[#55005a]">
+                        <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
+                            <div class="flex gap-4">
+                                <div class="bg-white w-[4px] h-full rounded-r-md"></div>
+                                <div class="text-white text-start font-bold">0.92</div>
+                            </div>
+                            <span class="text-white text-center">XG</span>
+                            <div class="flex gap-4 justify-end">
+                                <div class="text-white text-end font-bold">0.63</div>
+                                <div class="bg-transparent w-[4px] h-full rounded-l-md"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
+                            <div class="flex gap-4">
+                                <div class="bg-white w-[4px] h-full rounded-r-md"></div>
+                                <div class="text-white text-start font-bold">10</div>
+                            </div>
+                            <span class="text-white text-center">Total Shots</span>
+                            <div class="flex gap-4 justify-end">
+                                <div class="text-white text-end font-bold">5</div>
+                                <div class="bg-transparent w-[4px] h-full rounded-l-md"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
+                            <div class="flex gap-4">
+                                <div class="bg-white w-[4px] h-full rounded-r-md"></div>
+                                <div class="text-white text-start font-bold">4</div>
+                            </div>
+                            <span class="text-white text-center">Shots On Target</span>
+                            <div class="flex gap-4 justify-end">
+                                <div class="text-white text-end font-bold">2</div>
+                                <div class="bg-transparent w-[4px] h-full rounded-l-md"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
+                            <div class="flex gap-4">
+                                <div class="bg-white w-[4px] h-full rounded-r-md"></div>
+                                <div class="text-white text-start font-bold">1</div>
+                            </div>
+                            <span class="text-white text-center">Big Chances</span>
+                            <div class="flex gap-4 justify-end">
+                                <div class="text-white text-end font-bold">1</div>
+                                <div class="bg-[#7ab2e1] w-[4px] h-full rounded-l-md"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
+                            <div class="flex gap-4">
+                                <div class="bg-white w-[4px] h-full rounded-r-md"></div>
+                                <div class="text-white text-start font-bold">5</div>
+                            </div>
+                            <span class="text-white text-center">Corners</span>
+                            <div class="flex gap-4 justify-end">
+                                <div class="text-white text-end font-bold">3</div>
+                                <div class="bg-transparent w-[4px] h-full rounded-l-md"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
+                            <div class="flex gap-4">
+                                <div class="bg-transparent w-[4px] h-full rounded-r-md"></div>
+                                <div class="text-white text-start font-bold">0</div>
+                            </div>
+                            <span class="text-white text-center">Saves</span>
+                            <div class="flex gap-4 justify-end">
+                                <div class="text-white text-end font-bold">2</div>
+                                <div class="bg-[#7ab2e1] w-[4px] h-full rounded-l-md"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @foreach (var matchEventType in Model.MatchEventTypesDtos)
+            {
+                <div class="accordion-item">
+                    <div onclick="toggleAccordion(this)"
+                         class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
+                        <span
+                        class="text-xs font-medium text-white uppercase tracking-wider">@matchEventType.MatchEventTypeName</span>
+                        <div class="flex items-center justify-center rounded-full bg-[#37003c] w-6 h-6">
+                            <i class="fa-solid fa-chevron-down text-white text-xs transition-transform duration-300"></i>
+                        </div>
+                    </div>
+
+                    <div
+                        class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
+                        <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
+                            <div class="flex gap-4">
+                                <div class="bg-white w-[4px] h-full rounded-r-md"></div>
+                                <div class="text-white text-start font-bold">10</div>
+                            </div>
+                            <span class="text-white text-center">Total Shots</span>
+                            <div class="flex gap-4 justify-end">
+                                <div class="text-white text-end font-bold">5</div>
+                                <div class="bg-transparent w-[4px] h-full rounded-l-md"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="/js/matchEvent/index.js" asp-append-version="true"></script>
+}
+

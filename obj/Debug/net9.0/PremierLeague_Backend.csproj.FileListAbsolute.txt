@@ -230,7 +230,6 @@ D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\n1f4khiws3
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\4mcq8srkh9-{0}-wlmdlqu8f5-wlmdlqu8f5.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\5rcxtrfp23-{0}-ogxohffscy-ogxohffscy.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\e95appd8ry-{0}-c1m1mxnnjw-c1m1mxnnjw.gz
-D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\dizf7fm1d9-{0}-q1hv5sde1l-q1hv5sde1l.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\lzwmvxvse6-{0}-1wjc8fveay-1wjc8fveay.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\k00x71o3cg-{0}-ssps5vuq30-ssps5vuq30.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\wc8yenaeyx-{0}-2vch4pjjiu-2vch4pjjiu.gz
@@ -309,3 +308,6 @@ D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\xwuwmqz9lt
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\staticwebassets.build.json.cache
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\swae.build.ex.cache
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\7md593ejhs-{0}-9ny46m8uye-9ny46m8uye.gz
+D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\6xujppcjd3-{0}-lm5le0o8rp-lm5le0o8rp.gz
+D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\6vmm77fuoh-{0}-z9osf5471q-z9osf5471q.gz
+D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\dizf7fm1d9-{0}-e4z533pjhk-e4z533pjhk.gz

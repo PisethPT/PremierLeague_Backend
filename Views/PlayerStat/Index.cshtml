@@ -34,14 +34,133 @@
 }
 
 
+<div id="modalBackdrop" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
 
+<div id="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center m-4">
+    <div id="modalBox" class="bg-[#1e0021] rounded-2xl shadow-xl p-6 transition-all duration-300 scale-90 opacity-0"
+         onclick="event.stopPropagation()">
 
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-white" id="modalTitle">Create New Player Stats</h2>
+            <button onclick="closeModal()"
+                    class="bg-[#55005a] text-white flex items-center justify-center w-8 h-8 rounded-full hover:bg-[#410544] cursor-pointer hover:ring-2 hover:!ring-[#8a3fbf]">
+                <i class="fa-solid fa-xmark text-white"></i>
+            </button>
+        </div>
+
+        <form id="playerStatForm" asp-controller="PlayerStat" asp-action="Create" method="post" asp-antiforgery="true"
+              class="h-auto p-2" enctype="multipart/form-data" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="playerStatId" asp-for="PlayerStatDto.PlayerStatId" />
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 h-fit">
+                <div class="grid grid-rows-1 md:grid-rows-2 xl:grid-rows-2 gap-4 h-fit">
+                    <label class="flex flex-col gap-2">
+                        <span class="flex items-center gap-1">
+                            <span class="text-white font-medium">Stat Categories</span>
+                            <span class="text-red-400">*</span>
+                        </span>
+                        <input id="statCategoryIdHidden" asp-for="StatCategoryId" type="hidden" />
+                        <select id="statCategory" class="js-custom-select" asp-for="StatCategoryId"
+                                asp-items="Model.StatCategoriesSelectListItem">
+                            <option value="">Select Stat Category</option>
+                        </select>
+                        <span asp-validation-for="StatCategoryId" class="text-red-400 text-sm"
+                              id="statCategoryId-validation"></span>
+                    </label>
+                    <label class="flex flex-col gap-2">
+                        <span class="flex items-center gap-1">
+                            <span class="text-white font-medium">Stats</span>
+                            <span class="text-red-400">*</span>
+                        </span>
+                        <input id="statIdHidden" asp-for="PlayerStatDto.StatId" type="hidden" />
+                        <select id="stat" class="js-custom-select" asp-for="PlayerStatDto.StatId">
+                            <option value="">Select Stats</option>
+                        </select>
+                        <span asp-validation-for="PlayerStatDto.StatId" class="text-red-400 text-sm"
+                              id="statId-validation"></span>
+                    </label>
+                    
+                </div>
+                <div class="grid grid-rows-1 md:grid-rows-[auto_auto] xl:grid-rows-[auto_auto] gap-4">
+                    <label id="isPlayerLabel" class="flex flex-col gap-2">
+                        <span class="flex items-center gap-1">
+                            <span class="text-white font-medium">Players</span>
+                            <span class="text-red-400">*</span>
+                        </span>
+                        <input id="playerIdHidden" asp-for="PlayerStatDto.PlayerId" type="hidden" />
+                        <select id="player" class="js-custom-select" data-show-image="true"
+                                asp-for="PlayerStatDto.PlayerId">
+                            <option value="">Select Players</option>
+                        </select>
+                        <span asp-validation-for="PlayerStatDto.PlayerId" class="text-red-400 text-sm"
+                              id="playerId-validation"></span>
+                    </label>
+
+                    <div class="grid grid-cols-1 md:grid-cols-[150px_auto] xl:grid-cols-[150px_auto] gap-4">
+                        <label class="flex flex-col gap-2">
+                            <span class="flex items-center gap-1">
+                                <span id="valueLabelId" class="text-white font-medium">Value (N/A)</span>
+                                <span class="text-red-400">*</span>
+                            </span>
+                            <input id="valueId" asp-for="PlayerStatDto.Value" type="number" min="0"
+                                   class="bg-[#55005a] text-white placeholder:text-gray-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#8a3fbf]" />
+                            <span asp-validation-for="PlayerStatDto.Value" class="text-red-400 text-sm"
+                                  id="valueId-validation"></span>
+                        </label>
+
+                        <label id="previewSection" class="hidden flex-col gap-2">
+                            <span class="flex items-center gap-1">
+                                <span id="previewLabelId" class="text-white font-medium">Player Preview</span>
+                                <span class="text-red-400">*</span>
+                            </span>
+                            <div id="clubTheme" class="flex flex-col gap-1 rounded-2xl pt-4 px-4 overflow-hidden"
+                                 style="background-color: #ff0000;">
+                                <div class="flex flex-col gap-1">
+                                    <span id="playerFirstName" class="text-white text-lg font-normal">N/A</span>
+                                    <span id="playerLastName" class="text-white text-xl font-bold">N/A</span>
+                                    <span id="playerPosition" class="text-white text-lg font-normal">N/A</span>
+                                    <button
+                                        class="bg-[#ffffff2b] text-white text-center text-sm px-3 py-1 rounded-2xl w-fit text-nowrap whitespace-nowrap">View
+                                        stats <i class="fas fa-chevron-right !text-[8px]"></i>
+                                    </button>
+                                    
+                                </div>
+                                <div class="flex justify-between items-end gap-1 h-full">
+                                    <div class="flex flex-col justify-center gap-4">
+                                        <div class="flex mt-3">
+                                            <img id="clubCrest" src="/upload/clubs/ars.png"
+                                                 class="w-auto h-16 object-contain" />
+                                        </div>
+                                        <span id="playerNumber" class="text-white text-4xl font-bold mb-4">N/A</span>
+                                    </div>
+                                    <img id="playerPhoto" src="/upload/players/placeholder.png"
+                                         class="w-auto h-48 object-contain cursor-pointer" />
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex flex-col md:flex-row justify-between gap-3">
+                <div class="text-sm text-gray-200/80">Fields with <span class="text-red-400">*</span> are required.
+                </div>
+                <div class="flex gap-3">
+                    <button type="reset" id="resetBtn"
+                            class="text-white px-4 py-2 bg-[#410544] rounded-lg hover:bg-[#55005a] transition hover:ring-2 hover:!ring-[#8a3fbf]">Reset</button>
+                    <button type="submit"
+                            class="text-white px-4 py-2 bg-[#8a3fbf] rounded-lg hover:bg-[#6b2fa0] transition hover:ring-2 hover:!ring-[#8a3fbf]">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 <div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden">
     <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-4 w-full">
         <div class="flex items-center justify-between lg:justify-start gap-4">
             <a href="@Url.Action("Index", "Season")"
-               class="inline-block bg-[#55005a] text-white px-4 py-2 hover:bg-[#410544] rounded-lg transition hover:ring-2 hover:!ring-[#8a3fbf] text-nowrap">
+                   class="inline-block bg-[#55005a] text-white px-4 py-2 hover:bg-[#410544] rounded-lg transition hover:ring-2 hover:!ring-[#8a3fbf] text-nowrap">
                 Back
                 to
                 Home
@@ -59,21 +178,23 @@
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
     <div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden h-fit max-h-[83vh]">
         <h2 class="text-white text-md font-semibold uppercase">Matches</h2>
-
-        <div class="overflow-y-auto max-h-[78vh] scrollbar-none overflow-hidden rounded-t-lg">
+        <div class="overflow-y-auto overflow-x-auto max-h-[78vh] scrollbar-none overflow-hidden rounded-t-lg">
             <table class="min-w-full divide-y divide-[#55005a]">
                 <thead class="bg-[#55005a] sticky top-0 z-10">
                     <tr>
                         <th class="px-1 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">
                             ID
                         </th>
-                        <th class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center text-nowrap">
+                        <th
+                            class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center text-nowrap">
                             Home Club
                         </th>
-                        <th class="px-auto py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                        <th
+                            class="px-auto py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
                             Match Info
                         </th>
-                        <th class="px-1 py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                        <th
+                            class="px-1 py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
                             Away Club
                         </th>
                     </tr>
@@ -85,7 +206,8 @@
                         <tr class="cursor-pointer">
                             <td class="px-1 py-4 whitespace-nowrap text-sm text-white">
                                 <div class="flex justify-center items-center">
-                                    <div class="w-8 h-8 text-white text-sm font-bold text-center flex justify-center items-center bg-[#c] rounded-full ring-2 !ring-[#8a3fbf]">
+                                    <div
+                                        class="w-8 h-8 text-white text-sm font-bold text-center flex justify-center items-center bg-[#c] rounded-full ring-2 !ring-[#8a3fbf]">
                                         @index
                                     </div>
                                 </div>
@@ -102,17 +224,20 @@
                                         <div class="bg-[#8e07ee] flex justify-center items-center w-4 h-4 rounded-full">
                                             <span class="text-white !text-[11px] font-bold">+</span>
                                         </div>
-                                        <span class="text-[#8e07ee] text-center text-sm font-thin hover:underline">
+                                        <button onclick="toggleAddStat(@match.MatchId, @match.HomeClubId, true)"
+                                                class="text-[#8e07ee] text-center text-sm font-thin hover:underline">
                                             Add
                                             stats
-                                        </span>
+                                        </button>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
                                 <div class="flex justify-start items-center flex-col gap-2">
-                                    <div class="bg-[#8a3fbf] flex justify-center items-center flex-col w-fit px-4 py-1 rounded-md">
-                                        <span class="text-white text-center text-xl font-semibold">@match.HomeClubGoal-@match.AwayClubGoal</span>
+                                    <div
+                                        class="bg-[#8a3fbf] flex justify-center items-center flex-col w-fit px-4 py-1 rounded-md">
+                                        <span
+                                        class="text-white text-center text-xl font-semibold">@match.HomeClubGoal-@match.AwayClubGoal</span>
                                         <span class="text-white text-center text-[9px] font-bold">@match.MatchStatus</span>
                                     </div>
                                     <span class="text-white text-center text-md font-bold">@match.MatchDate</span>
@@ -134,10 +259,11 @@
                                         <div class="bg-[#8e07ee] flex justify-center items-center w-4 h-4 rounded-full">
                                             <span class="text-white !text-[11px] font-bold">+</span>
                                         </div>
-                                        <span class="text-[#8e07ee] text-center text-sm font-thin hover:underline">
+                                        <button onclick="toggleAddStat(@match.MatchId, @match.AwayClubId, false)"
+                                                class="text-[#8e07ee] text-center text-sm font-thin hover:underline">
                                             Add
                                             stats
-                                        </span>
+                                        </button>
                                     </div>
                                 </div>
                             </td>
@@ -150,9 +276,8 @@
 
     <div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden h-fit max-h-[86vh]">
         <h2 class="text-white text-md font-semibold uppercase">Stats</h2>
-
         <div class="flex flex-col gap-2 overflow-y-auto max-h-[76.5vh] scrollbar-none overflow-hidden rounded-t-lg">
-
+            <!-- Top Stats -->
             <div class="accordion-item">
                 <div onclick="toggleAccordion(this)"
                      class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
@@ -246,7 +371,7 @@
                     </div>
                 </div>
             </div>
-
+            <!--  Attack -->
             <div class="accordion-item">
                 <div onclick="toggleAccordion(this)"
                      class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
@@ -256,7 +381,8 @@
                     </div>
                 </div>
 
-                <div class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
+                <div
+                    class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
                     <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
                         <div class="flex gap-4">
                             <div class="bg-white w-[4px] h-full rounded-r-md"></div>
@@ -354,7 +480,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Possession -->
             <div class="accordion-item">
                 <div onclick="toggleAccordion(this)"
                      class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
@@ -364,7 +490,8 @@
                     </div>
                 </div>
 
-                <div class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
+                <div
+                    class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
                     <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
                         <div class="flex gap-4">
                             <div class="bg-white w-[4px] h-full rounded-r-md"></div>
@@ -426,7 +553,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Defence -->
             <div class="accordion-item">
                 <div onclick="toggleAccordion(this)"
                      class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
@@ -436,7 +563,8 @@
                     </div>
                 </div>
 
-                <div class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
+                <div
+                    class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
                     <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
                         <div class="flex gap-4">
                             <div class="bg-white w-[4px] h-full rounded-r-md"></div>
@@ -498,7 +626,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Physical -->
             <div class="accordion-item">
                 <div onclick="toggleAccordion(this)"
                      class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
@@ -508,7 +636,8 @@
                     </div>
                 </div>
 
-                <div class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
+                <div
+                    class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
                     <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
                         <div class="flex gap-4">
                             <div class="bg-white w-[4px] h-full rounded-r-md"></div>
@@ -570,7 +699,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Discipline -->
             <div class="accordion-item">
                 <div onclick="toggleAccordion(this)"
                      class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
@@ -580,7 +709,8 @@
                     </div>
                 </div>
 
-                <div class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
+                <div
+                    class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
                     <div class="p-3 grid grid-cols-[1fr_auto_1fr]">
                         <div class="flex gap-4">
                             <div class="bg-white w-[4px] h-full rounded-r-md"></div>
@@ -630,24 +760,11 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        function toggleAccordion(header) {
-            const content = header.nextElementSibling;
-            const icon = header.querySelector("i");
-
-            if (content.style.maxHeight) {
-                content.style.maxHeight = null;
-                icon.classList.remove("rotate-180");
-            } else {
-                content.style.maxHeight = content.scrollHeight + "px";
-                icon.classList.add("rotate-180");
-            }
-        }
-    </script>
+    <partial name="_ValidationScriptsPartial" />
+    <script src="/js/playerStat/index.js" asp-append-version="true"></script>
 }

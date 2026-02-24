@@ -12,5 +12,5 @@ public interface IPlayerStatRepository
     Task<PlayerStatDetailDto> GetPlayerStatDetailDtoAsync(int matchId, int clubId, int playerId, CancellationToken ct = default);
     Task<IEnumerable<PlayerStatGetPlayersDto>> GetHomePlayersForPlayerStatByClubIdAndMatchIdAsync(int matchId, int clubId, CancellationToken ct = default);
     Task<IEnumerable<PlayerStatGetPlayersDto>> GetAwayPlayersForPlayerStatByClubIdAndMatchIdAsync(int matchId, int clubId, CancellationToken ct = default);
-    Task<IEnumerable<PlayerStatGetStatsByCategoryDto>> GetStatByCategoryIdForPlayerStatAsync(int statCategoryId, int statScopeId, CancellationToken ct = default);
+    Task<IEnumerable<PlayerStatGetStatsByCategoryDto>> GetStatByIdForPlayerStatAsync(int statId, CancellationToken ct = default);
 }

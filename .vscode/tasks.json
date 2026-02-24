@@ -5,7 +5,9 @@
       "type": "cmake",
       "label": "CMake: build",
       "command": "build",
-      "targets": ["[N/A - Select Kit]"],
+      "targets": [
+        "[N/A - Select Kit]"
+      ],
       "group": "build",
       "problemMatcher": [],
       "detail": "CMake template build task"
@@ -16,6 +18,15 @@
       "group": "build",
       "problemMatcher": [],
       "label": "dotnet: build"
+    },
+    {
+      "type": "npm",
+      "script": "install",
+      "path": "bin/Debug/net9.0",
+      "group": "clean",
+      "problemMatcher": [],
+      "label": "npm: install - bin/Debug/net9.0",
+      "detail": "install dependencies from package"
     }
   ]
 }
