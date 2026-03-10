@@ -1,0 +1,345 @@
+﻿@using PremierLeague_Backend.Models.DTOs
+@using PremierLeague_Backend.Helper
+@using PremierLeague_Backend.Models.ViewModels
+@model VideoViewModel
+@{
+    ViewData["Title"] = "Videos";
+    int index = 0;
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="bg-red-100 border-red-700 text-red-700 px-4 py-2 rounded-t-lg mb-4 flex justify-between transition-all duration-300"
+         id="errorAlertPanel">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+        <div class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer">
+            <button onclick="closeAlertPanel('errorAlertPanel')" class="text-red-700">✕</button>
+        </div>
+    </div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="bg-[#8a3fbf] text-white px-4 py-2 rounded-t-lg mb-4 flex justify-between items-center transition-all duration-300 hover:ring-2 hover:!ring-[#8a3fbf]"
+         id="infoAlertPanel">
+        <span>@TempData["SuccessMessage"]</span>
+        <div class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer">
+            <button onclick="closeAlertPanel('infoAlertPanel')" class="text-white">✕</button>
+        </div>
+    </div>
+}
+
+
+<div id="modalBackdrop" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
+
+<div id="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center m-4">
+    <div id="modalBox"
+         class="bg-[#1e0021] rounded-2xl shadow-xl transition-all duration-300 scale-90 opacity-0 w-full max-w-5xl max-h-[90vh] flex flex-col"
+         onclick="event.stopPropagation()">
+
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-white" id="modalTitle">Create Video</h2>
+            <button onclick="closeModal()"
+                    class="bg-[#55005a] text-white flex items-center justify-center w-8 h-8 rounded-full hover:bg-[#410544] hover:ring-2 hover:ring-[#8a3fbf]">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="videoForm" asp-controller="Video" asp-action="Create" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="videoId" asp-for="VideoDto.VideoId" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <label class="flex flex-col gap-2">
+                    <span class="flex justify-between">
+                        <span class="text-white font-medium">Title <span class="text-red-400">*</span></span>
+                        <span class="text-xs text-gray-400"><span data-count-for="title">0</span> / 255</span>
+                    </span>
+                    <input id="title" asp-for="VideoDto.Title" maxlength="255"
+                           class="char-counter-input bg-[#55005a] text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#8a3fbf] outline-none" />
+                    <span asp-validation-for="VideoDto.Title" class="text-red-400 text-sm"></span>
+                </label>
+
+                <label class="flex flex-col gap-2">
+                    <span class="text-white font-medium">Video URL <span class="text-red-400">*</span></span>
+                    <input id="videoUrl" asp-for="VideoDto.VideoUrl" placeholder="https://youtube.com/..."
+                           class="bg-[#55005a] text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#8a3fbf] outline-none" />
+                    <span asp-validation-for="VideoDto.VideoUrl" class="text-red-400 text-sm"></span>
+                </label>
+
+                <label class="flex flex-col gap-2">
+                    <span class="text-white font-medium">Channel</span>
+                    <input id="channel" asp-for="VideoDto.Channel"
+                           class="bg-[#55005a] text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#8a3fbf] outline-none" />
+                </label>
+                <label class="flex flex-col gap-2">
+                    <span class="text-white font-medium">Publisher <span class="text-red-400">*</span></span>
+                    <input id="publisher" asp-for="VideoDto.Publisher"
+                           class="bg-[#55005a] text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#8a3fbf] outline-none" />
+                </label>
+
+                <label class="flex flex-col gap-2">
+                    <span class="text-white font-medium">Category <span class="text-red-400">*</span></span>
+                    <select id="selectVideoCategory" class="js-custom-select" asp-for="VideoDto.VideoCategoryId">
+                        <option value="">Select Category</option>
+                        @foreach (var cat in Model.SelectListItemVideoCategory)
+                        {
+                            <option value="@cat.Value">@cat.Label</option>
+                        }
+                    </select>
+                </label>
+                <label class="flex flex-col gap-2">
+                    <span class="text-white font-medium">Duration (Seconds)</span>
+                    <input id="durationSeconds" asp-for="VideoDto.DurationSeconds" type="number" step="0.01"
+                           class="bg-[#55005a] text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#8a3fbf] outline-none" />
+                </label>
+            </div>
+
+            <label class="flex flex-col gap-2 mt-4">
+                <span class="flex justify-between">
+                    <span class="text-white font-medium">Description <span class="text-red-400">*</span></span>
+                    <span class="text-xs text-gray-400"><span data-count-for="description">0</span> / 4000</span>
+                </span>
+                <textarea id="description" asp-for="VideoDto.Description" rows="3" maxlength="4000"
+                          class="char-counter-input bg-[#55005a] text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#8a3fbf] outline-none"></textarea>
+            </label>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                <label class="flex flex-col gap-1">
+                    <span class="text-white text-sm">Match ID</span>
+                    <input id="matchId" asp-for="VideoDto.MatchId" type="number"
+                           class="bg-[#55005a] text-xs text-white rounded px-3 py-2 outline-none" />
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-white text-sm">Club ID</span>
+                    <input id="clubId" asp-for="VideoDto.ClubId" type="number"
+                           class="bg-[#55005a] text-xs text-white rounded px-3 py-2 outline-none" />
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-white text-sm">Player ID</span>
+                    <input id="playerId" asp-for="VideoDto.PlayerId" type="number"
+                           class="bg-[#55005a] text-xs text-white rounded px-3 py-2 outline-none" />
+                </label>
+                <label class="flex flex-col gap-1">
+                    <span class="text-white text-sm">Season ID</span>
+                    <input id="seasonId" asp-for="VideoDto.SeasonId" type="number"
+                           class="bg-[#55005a] text-xs text-white rounded px-3 py-2 outline-none" />
+                </label>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <div class="flex flex-col gap-4">
+                    <label class="flex flex-col gap-1">
+                        <span class="text-white text-sm">Published Date</span>
+                        <input id="publishedDate" asp-for="VideoDto.PublishedDate" type="date"
+                               class="bg-[#55005a] text-white rounded-lg px-4 py-2 outline-none" />
+                    </label>
+                    <label class="flex flex-col gap-1">
+                        <span class="text-white text-sm">Expiry Date</span>
+                        <input id="expiryDate" asp-for="VideoDto.ExpiryDate" type="date"
+                               class="bg-[#55005a] text-white rounded-lg px-4 py-2 outline-none" />
+                    </label>
+                </div>
+                <div class="flex flex-col justify-center gap-4 bg-white/5 p-4 rounded-lg">
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" asp-for="VideoDto.IsFeatured" id="isFeatured"
+                               class="w-5 h-5 accent-[#8a3fbf]">
+                            <span class="text-white group-hover:text-[#8a3fbf] transition">Feature on Home Page</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" asp-for="VideoDto.IsActive" id="isActive"
+                                   class="w-5 h-5 accent-[#8a3fbf]">
+                                <span class="text-white group-hover:text-[#8a3fbf] transition">Active / Visible</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex flex-col md:flex-row justify-between gap-3">
+                        <div class="text-sm text-gray-200/80">Fields with <span class="text-red-400">*</span> are required.
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="reset" id="resetBtn"
+                                    class="text-white px-4 py-2 bg-[#410544] rounded-lg hover:bg-[#55005a] transition hover:ring-2 hover:!ring-[#8a3fbf]">Reset</button>
+                            <button type="submit"
+                                    class="text-white px-4 py-2 bg-[#8a3fbf] rounded-lg hover:bg-[#6b2fa0] transition hover:ring-2 hover:!ring-[#8a3fbf]">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="confirmDeleteModal" class="modal hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div class="modalBox bg-[#1e0021] !rounded-2xl shadow-2xl transition-all duration-300 scale-90 opacity-0 w-full max-w-lg overflow-hidden border border-red-900/30"
+                 onclick="event.stopPropagation()">
+        
+                <div class="bg-red-600/10 p-4 !rounded-2xl flex items-center gap-3 border-b border-red-600/20">
+                    <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center shadow-lg shadow-red-600/40">
+                        <i class="fa-solid fa-trash-can text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold">Delete Video?</h3>
+                        <p class="text-red-400 text-xs">This action cannot be undone.</p>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-4">
+                    <div class="bg-black/40 rounded-xl overflow-hidden border border-white/5">
+                        <div class="relative aspect-video">
+                            <img id="videoThumbDisplay" src="" class="w-full h-full object-cover opacity-60" />
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fa-solid fa-play text-white/30 text-3xl"></i>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <h4 id="videoTitleDisplay" class="text-white text-sm font-medium truncate">Video Title</h4>
+                            <p id="videoCategoryDisplay" class="text-gray-400 text-xs mt-1">Category</p>
+                        </div>
+                    </div>
+
+                    <p class="text-gray-300 text-sm text-center px-4">
+                        Are you sure you want to remove this video from the Premier League database?
+                    </p>
+                </div>
+
+                <form id="deleteVideoForm" asp-controller="Video" asp-action="Delete" method="post" class="p-6 pt-0 flex gap-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="VideoId" id="deleteVideoId" />
+            
+                    <button type="button" onclick="hideModal('confirmDeleteModal')"
+                            class="flex-1 px-4 py-2.5 bg-[#37003c] text-white rounded-xl hover:bg-[#410544] transition-all font-medium border border-white/5">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-bold shadow-lg shadow-red-600/20">
+                        Yes, Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden">
+            <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-4 w-full">
+                <div class="flex items-center justify-between lg:justify-start gap-4">
+                    <a href="@Url.Action("Index", "News")"
+                           class="inline-block bg-[#55005a] text-white px-4 py-2 hover:bg-[#410544] rounded-lg transition hover:ring-2 hover:!ring-[#8a3fbf] text-nowrap">Back
+                        to
+                        Home</a>
+                        <button onclick="openModal('modal-8xl', true)"
+                                class="inline-block bg-[#8a3fbf] hover:bg-[#6b2fa0] text-white px-4 py-2 rounded-lg transition hover:ring-2 hover:!ring-[#8a3fbf] text-nowrap"
+                                id="btnAddVideo">Add New</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-scroll overflow-y-auto max-h-[78vh] scrollbar-none rounded-t-lg p-4">
+                    <table class="min-w-full divide-y divide-[#55005a]">
+                        <thead class="bg-[#55005a] sticky top-0 z-10">
+                            <tr>
+                                <th class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">ID</th>
+                                <th class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">Action
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider whitespace-nowrap">
+                                    Status
+                                </th>
+                                <th class="px-0 py-2 text-center text-xs font-medium text-white uppercase tracking-wider">
+                                    Thumbnail
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                    Title
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                                    Description
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                                    Video Category
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                                    Channel
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                                    Author
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                                    Published Date
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                                    Expiry Date
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-transparent divide-y divide-[#55005a]">
+                            @foreach (var video in Model.VideoDetailDtos)
+                            {
+                                index++;
+                                <tr class="hover:bg-white/5 transition-colors">
+                                    <td class="px-2 py-3 whitespace-nowrap text-sm text-white text-center align-middle">
+                                        <div
+                                            class="w-8 h-8 mx-auto text-white text-sm font-bold flex justify-center items-center bg-[#55005a] rounded-full ring-2 ring-[#8a3fbf]">
+                                            @index
+                                        </div>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap text-sm text-white align-middle">
+                                        <div class="flex justify-center items-center gap-2">
+                                            <button onclick="toggleEditVideo(@video.VideoId)"
+                                                    class="w-9 h-9 text-white bg-[#8a3fbf] hover:bg-[#6b2fa0] rounded-xl flex justify-center items-center transition-all">
+                                                <i class="fa-solid fa-pencil"></i>
+                                            </button>
+                                            <button onclick="showModal('confirmDeleteModal', this, 'max-w-md', true)"
+                                                    class="w-9 h-9 text-white bg-red-500 hover:bg-red-600 rounded-xl flex justify-center items-center transition-all shadow-lg shadow-red-500/20">
+                                                <input type="hidden" name="videoId" value="@video.VideoId" />
+                                                <i class="fa-solid fa-circle-minus"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-left text-sm text-white align-middle">
+                                        <span class="px-2 py-1 rounded-md text-xs @(video.IsActive ? "bg-green-600" : "bg-gray-600")">
+                                            @(video.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </td>
+                                    <td class="px-0 py-2 w-auto h-24 min-w-[96px] align-middle overflow-hidden">
+                                        <div
+                                            class="relative w-auto h-24 min-w-[96px] aspect-video bg-black flex items-center justify-center">
+                                            <a href="@video.VideoUrl" target="_blank" class="group relative w-full h-full">
+                                                <img src="@VideoHelper.GetThumbnailUrl(video.VideoUrl)"
+                                                     class="w-auto h-24 object-cover opacity-60 group-hover:opacity-80 transition" />
+                                    
+                                                <div
+                                                    class="absolute text-center bg-[#4b1254] !w-7 !h-7 rounded-full !bottom-2 !right-2 flex !justify-center !items-center">
+                                                    <i class="fa-solid fa-play text-white text-[9px] mb-[1.5px] ml-[1px]"></i>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-left text-sm text-white align-middle font-medium">
+                                        <div class="w-full truncate" title="@video.Title">@video.Title</div>
+                                    </td>
+                                    <td class="px-4 py-3 text-left text-sm text-white align-middle font-medium">
+                                        <div class="w-64 truncate" title="@video.Description">@video.Description</div>
+                                    </td>
+                                    <td class="px-6 py-3 text-xs text-white text-center">@video.VideoCategory</td>
+                                    <td class="px-6 py-3 text-xs text-white text-center">
+                                        <div class="text-start w-full truncate">
+                                            @video.Channel
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-3 text-xs text-white text-center">@video.Publisher</td>
+                                    <td class="px-6 py-3 text-xs text-white text-center">@video.PublishedDate</td>
+                                    <td class="px-6 py-3 text-xs text-white text-center">@video.ExpiryDate</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            @section Scripts {
+                <partial name="_ValidationScriptsPartial" />
+                <script src="/js/video/index.js" asp-append-version="true"></script>
+                <script src="/js/video/delete.js" asp-append-version="true"></script>
+            }

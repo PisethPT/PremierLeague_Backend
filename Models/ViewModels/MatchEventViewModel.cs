@@ -5,6 +5,7 @@ namespace PremierLeague_Backend.Models.ViewModels;
 
 public class MatchEventViewModel
 {
+    public IEnumerable<MatchEventDetailDto> MatchEventDetailDtos { get; set; }
     public IEnumerable<MatchEventDuringMatchWeekDto> MatchEventDuringMatchWeekDtos { get; set; }
     public IEnumerable<MatchEventTypesDto> MatchEventTypesDtos { get; set; }
     public MatchEventDto MatchEventDto { get; set; }
@@ -15,6 +16,7 @@ public class MatchEventViewModel
 
     public MatchEventViewModel()
     {
+        this.MatchEventDetailDtos = new List<MatchEventDetailDto>();
         this.MatchEventDuringMatchWeekDtos = new List<MatchEventDuringMatchWeekDto>();
         this.MatchEventTypesDtos = new List<MatchEventTypesDto>();
         this.MatchEventDto = new MatchEventDto();

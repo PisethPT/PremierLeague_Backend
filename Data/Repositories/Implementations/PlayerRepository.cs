@@ -32,7 +32,12 @@ public class PlayerRepository : IPlayerRepository
 
             cmd.Parameters.AddWithValue("@FirstName", playerDto.FirstName);
             cmd.Parameters.AddWithValue("@LastName", playerDto.LastName);
-            cmd.Parameters.Add(new SqlParameter("@DateOfBirth", SqlDbType.Date) { Value = playerDto.DateOfBirth!.Value.ToDateTime(TimeOnly.MinValue) });
+            cmd.Parameters.Add(new SqlParameter("@DateOfBirth", SqlDbType.Date)
+            {
+                Value = playerDto.DateOfBirth.HasValue
+                ? playerDto.DateOfBirth.Value.ToDateTime(TimeOnly.MinValue)
+                : DBNull.Value
+            });
             cmd.Parameters.AddWithValue("@PlaceOfBirth", playerDto.PlaceOfBirth);
             cmd.Parameters.AddWithValue("@Nationality", playerDto.Nationality);
             cmd.Parameters.AddWithValue("@PreferredFoot", playerDto.PreferredFoot);
@@ -268,7 +273,6 @@ public class PlayerRepository : IPlayerRepository
 
         return Position.None;
     }
-
     PreferredFoot MapPreferredFoot(object dbValue)
     {
         if (dbValue == null)

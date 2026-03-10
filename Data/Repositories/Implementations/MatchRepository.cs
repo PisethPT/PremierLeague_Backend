@@ -284,7 +284,11 @@ public class MatchRepository : IMatchRepository
                     Attendance: rdr.IsDBNull(rdr.GetOrdinal("Attendance")) ? null : rdr.GetString(rdr.GetOrdinal("Attendance"))
                 );
             }
-            return null;
+            return new MatchInfoMatchDetailsDto(
+                Kickoff: null,
+                Stadium: null,
+                Attendance: null
+            );
         }
         catch (SqlException ex)
         {
@@ -368,7 +372,7 @@ public class MatchRepository : IMatchRepository
                 };
             }
 
-            return null!;
+            return new MatchWeekDto();
         }
         catch (SqlException ex)
         {

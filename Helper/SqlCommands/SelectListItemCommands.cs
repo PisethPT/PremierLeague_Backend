@@ -23,4 +23,8 @@ public static class SelectListItemCommands
     // Match Event Select List Items
     public static string CommandSelectListItemMatchEventOutcome => "PL_SelectListItemMatchEventOutcome";
     public static string CommandSelectListItemMatchEventType => "PL_SelectListItemMatchEventType";
+
+    public static string CommandSelectListItemNewsTag => "PL_CommandSelectListItemNewsTag";
+
+    public static string CommandSelectListItemVideosCategories => "PL_CommandSelectListItemVideosCategories";
 }

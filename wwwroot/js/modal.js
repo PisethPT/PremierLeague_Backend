@@ -4,36 +4,48 @@ const box = document.getElementById("modalBox");
 
 let staticModal = false;
 
-function openModal(sizeClass = "modal-md", isStatic = false) {
-  staticModal = isStatic;
+function openModal(sizeClass = "max-w-md", isStatic = false) {
+    staticModal = isStatic;
 
-  // completely reset and re-apply classes
-  box.className = `
-    !bg-[#1e0021] rounded-2xl shadow-xl p-6 transition-all duration-300
-    scale-90 opacity-0 h-auto w-full ${sizeClass}
-  `.trim();
+    document.body.style.overflow = "hidden";
+    document.body.style.paddingRight = "15px";
 
-  modal.classList.remove("hidden");
-  backdrop.classList.remove("hidden");
+    box.className = `
+        !bg-[#1e0021] rounded-2xl shadow-xl p-6 transition-all duration-300
+        scale-90 opacity-0 w-full max-h-[90vh] overflow-y-auto 
+        ${sizeClass}
+    `.trim();
 
-  setTimeout(() => {
-    box.classList.remove("scale-90", "opacity-0");
-    box.classList.add("scale-100", "opacity-100");
-  }, 10);
+    modal.classList.remove("hidden");
+    backdrop.classList.remove("hidden");
+    box.scrollTop = 0;
+
+    setTimeout(() => {
+        box.classList.remove("scale-90", "opacity-0");
+        box.classList.add("scale-100", "opacity-100");
+    }, 10);
 }
 
 function closeModal() {
-  box.classList.add("scale-90", "opacity-0");
+    box.classList.add("scale-90", "opacity-0");
 
-  setTimeout(() => {
-    modal.classList.add("hidden");
-    backdrop.classList.add("hidden");
-  }, 200);
+    document.body.style.overflow = "";
+    document.body.style.paddingRight = "";
+
+    setTimeout(() => {
+        modal.classList.add("hidden");
+        backdrop.classList.add("hidden");
+    }, 200);
 }
 
-// close on background click (non-static only)
 if (backdrop) {
-  backdrop.addEventListener("click", () => {
-    if (!staticModal) closeModal();
-  });
+    backdrop.addEventListener("click", (e) => {
+        if (!staticModal) closeModal();
+    });
 }
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+        if (!staticModal) closeModal();
+    }
+});

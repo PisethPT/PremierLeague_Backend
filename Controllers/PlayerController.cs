@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace epl_backend.Controllers
 {
-    [Route("players")]
+    [Route("en/players")]
     public class PlayerController : Controller
     {
         private readonly PlayerViewModel viewModel;

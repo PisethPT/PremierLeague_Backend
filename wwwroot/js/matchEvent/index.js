@@ -1,8 +1,8 @@
-const MATCH_EVENTS_BASE_CONTROLLER = "/match-events";
+const MATCH_EVENTS_BASE_CONTROLLER = "/en/match-events";
 const MATCH_EVENTS_ENDPOINT = {
   CREATE_MATCH_EVENTS_ENDPOINT: MATCH_EVENTS_BASE_CONTROLLER + "/create",
   UPDATE_MATCH_EVENTS_ENDPOINT: MATCH_EVENTS_BASE_CONTROLLER + "/update",
-  FIND_MATCH_EVENTS_BY_ID_ENDPOINT: MATCH_EVENTS_BASE_CONTROLLER + "/get-match",
+  GET_MATCH_EVENT_ENDPOINT: MATCH_EVENTS_BASE_CONTROLLER + "/get-match-event",
   GET_PLAYER_ENDPOINT: MATCH_EVENTS_BASE_CONTROLLER + "/get-players",
 };
 
@@ -88,42 +88,63 @@ function toggleAccordion(header) {
 }
 
 function toggleAddMatchEvent(matchId, clubId, isHomeClub = true) {
+  const form = $("#matchEventForm");
+  form.attr("action", MATCH_EVENTS_ENDPOINT.CREATE_MATCH_EVENTS_ENDPOINT);
   resetForm();
   openModal("modal-8xl", true);
 
   $("#matchId").val(matchId);
   $("#clubId").val(clubId);
+  toggleGetPlayers(matchId, clubId, isHomeClub);
+}
 
-  $.ajax({
-    url: MATCH_EVENTS_ENDPOINT.GET_PLAYER_ENDPOINT + `/${matchId}/${clubId}`,
-    method: "GET",
-    headers: {
-      RequestVerificationToken: $(
-        'input[name="__RequestVerificationToken"]',
-      ).val(),
-    },
-    data: { isHomeClub: isHomeClub },
-    success: function (response) {
-      const defaultPlayerPath = "/upload/players/";
-      playerItems = response.data.playerItems;
+async function toggleEditMatchEvent(matchEventId, isHomeClub = true) {
+  try {
+    resetForm();
 
-      if (!Array.isArray(playerItems)) {
-        playerItems = [playerItems];
-      }
+    const response = await $.ajax({
+      url: MATCH_EVENTS_ENDPOINT.GET_MATCH_EVENT_ENDPOINT + `/${matchEventId}`,
+      method: "GET",
+      headers: {
+        RequestVerificationToken: $(
+          'input[name="__RequestVerificationToken"]',
+        ).val(),
+      },
+    });
 
-      const itemOptions = playerItems.map((it) => ({
-        value: it.playerId,
-        label: `${it.firstName || ""} ${it.lastName || ""}`.trim(),
-        img: defaultPlayerPath + (it.photo || "placeholder.png"),
-        subtitle: `${it.position || ""} • ${it.playerNumber ?? ""}`,
-      }));
+    const data = response.data.matchEvent;
 
-      window.playerInst.updateOptions(itemOptions);
-    },
-    error: function (err) {
-      console.error(err);
-    },
-  });
+    $("#matchEventId").val(data.matchEventId);
+    $("#matchId").val(data.matchId);
+    $("#clubId").val(data.clubId);
+    eventTypeInst.setValue(data.eventTypeId);
+    outcomeInst.setValue(data.outcomeId);
+
+    $("#minuteId").val(data.minute);
+    $("#isPenalty").prop("checked", data.isPenalty).trigger("change");
+    $("#isOwnGoal").prop("checked", data.isOwnGoal).trigger("change");
+    $("#isInsideBox").prop("checked", data.isInsideBox).trigger("change");
+    $("#isBigChance").prop("checked", data.isBigChance).trigger("change");
+    $("#isWoodwork").prop("checked", data.isWoodwork).trigger("change");
+
+    await toggleGetPlayers(data.matchId, data.clubId, isHomeClub);
+    playerInst.setValue(data.playerId);
+    toggleRelatedEvent(data.playerId);
+    relatedEventInst.setValue(data.relatedEventId);
+
+    $("#modalTitle").text("Update Match Event");
+    $("#matchEventForm").attr(
+      "action",
+      MATCH_EVENTS_ENDPOINT.UPDATE_MATCH_EVENTS_ENDPOINT +
+        "/" +
+        data.matchEventId,
+    );
+
+    openModal("modal-8xl", true);
+  } catch (err) {
+    console.error(err);
+    alert(JSON.stringify(err));
+  }
 }
 
 function validateForm(formSelector) {
@@ -160,6 +181,36 @@ function toggleRelatedEvent(playerId) {
   relatedEventSelect.empty();
   window.relatedEventInst.updateOptions(relatedEventItems);
   relatedEventSelect.val(null).trigger("change");
+}
+
+function toggleGetPlayers(matchId, clubId, isHomeClub = true) {
+  return $.ajax({
+    url: MATCH_EVENTS_ENDPOINT.GET_PLAYER_ENDPOINT + `/${matchId}/${clubId}`,
+    method: "GET",
+    headers: {
+      RequestVerificationToken: $(
+        'input[name="__RequestVerificationToken"]',
+      ).val(),
+    },
+    data: { isHomeClub: isHomeClub },
+    success: function (response) {
+      const defaultPlayerPath = "/upload/players/";
+      playerItems = response.data.playerItems;
+
+      if (!Array.isArray(playerItems)) {
+        playerItems = [playerItems];
+      }
+
+      const itemOptions = playerItems.map((it) => ({
+        value: it.playerId,
+        label: `${it.firstName || ""} ${it.lastName || ""}`.trim(),
+        img: defaultPlayerPath + (it.photo || "placeholder.png"),
+        subtitle: `${it.position || ""} • ${it.playerNumber ?? ""}`,
+      }));
+
+      window.playerInst.updateOptions(itemOptions);
+    },
+  });
 }
 
 $("#playerSelect").on("change", function () {

@@ -7,7 +7,7 @@ using PremierLeague_Backend.Helper.Validation;
 
 namespace PremierLeague_Backend.Controllers
 {
-    [Route("matches")]
+    [Route("en/matches")]
     public class MatchController : Controller
     {
         private readonly ILogger<MatchController> _logger;
@@ -24,7 +24,7 @@ namespace PremierLeague_Backend.Controllers
 
         // GET: MatchController
         [HttpGet]
-        public async Task<ActionResult> Index(List<int> club, int season, int week = 0, int? page = 1)
+        public async Task<ActionResult> IndexAsync(List<int> club, int season, int week = 0, int? page = 1)
         {
             try
             {
@@ -43,6 +43,7 @@ namespace PremierLeague_Backend.Controllers
                     //(week, seasonId) = await repository.GetCurrentMatchWeekAndSeasonIdAsync();
                     week = matchSeasonDto.MatchWeek;
                 }
+                week = week > 28 ? 28 : week;
 
                 viewModel.SelectedClubIds = club;
                 var clubIdJson = System.Text.Json.JsonSerializer.Serialize(club);
@@ -156,7 +157,7 @@ namespace PremierLeague_Backend.Controllers
                 if (!isUpdated)
                 {
                     ModelState.AddModelError(string.Empty, "Unable to update match. Please try again or contact admin.");
-                    _logger.LogWarning("UpdateMatchAsync returned {success} for match {MatchId}", isUpdated, matchDto.MatchId);
+                    _logger.LogWarning("UpdateMatchAsync returned {success} for match {MatchId}", isUpdated, matchId);
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -165,7 +166,7 @@ namespace PremierLeague_Backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating match on {Date}", matchDto.MatchDate);
+                _logger.LogError(ex, "Error updating match {MatchId}", matchId);
                 ModelState.AddModelError(string.Empty, ex.Message);
                 return RedirectToAction(nameof(Index));
             }

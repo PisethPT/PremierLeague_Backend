@@ -66,9 +66,9 @@
                             <ul class="submenu mt-1 ml-3 space-y-1 max-h-0 overflow-hidden transition-[max-height] duration-300"
                                 aria-hidden="true">
                                 <li>
-                                    <a href="/clubs/all-club"
+                                    <a href="/en/clubs"
                                            class="menu-item flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition"
-                                           id="menu-all-club">
+                                           id="menu-clubs">
                                         <i class="fa-solid fa-shapes menu-icon w-4 text-center"></i>
                                         <span class="menu-label truncate ml-2">All Clubs</span>
                                     </a>
@@ -120,78 +120,22 @@
                             </ul>
                         </li>
 
-                        <li class="relative has-submenu">
-                            <button type="button"
-                                    class="w-full menu-item flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition justify-between submenu-toggle"
-                                    aria-expanded="false">
-                                <span class="flex items-center gap-3">
-                                    <i class="fa-solid fa-newspaper menu-icon w-4 text-center"></i>
-                                    <span class="menu-label truncate ml-2">News</span>
-                                </span>
-                                <i class="fas fa-chevron-right text-sm"></i>
-                            </button>
-
-                            <ul class="submenu mt-1 ml-3 space-y-1 max-h-0 overflow-hidden transition-[max-height] duration-300"
-                                aria-hidden="true">
-                                <li>
-                                    <a asp-controller="News" asp-action="ClubNews"
-                                           class="menu-item flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition">
-                                        <i class="fas fa-folder menu-icon w-4 text-center"></i>
-                                        <span class="menu-label truncate ml-2">Club News</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a asp-controller="News" asp-action="PlayerNews"
-                                           class="menu-item flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition">
-                                        <i class="fas fa-balance-scale menu-icon w-4 text-center"></i>
-                                        <span class="menu-label truncate ml-2">Goals</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a asp-controller="News" asp-action="MatchNews"
-                                           class="menu-item flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition">
-                                        <i class="fas fa-warehouse menu-icon w-4 text-center"></i>
-                                        <span class="menu-label truncate ml-2">Match News</span>
-                                    </a>
-                                </li>
-                            </ul>
+                        <li>
+                            <a asp-controller="News" asp-action="Index"
+                                   class="menu-item group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition"
+                                   id="menu-news" role="link">
+                                <i class="fa-solid fa-newspaper menu-icon menu-icon w-4 text-center"></i>
+                                <span class="menu-label truncate ml-2">News</span>
+                            </a>
                         </li>
-
-                        <li class="relative has-submenu">
-                            <button type="button"
-                                    class="w-full menu-item flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition justify-between submenu-toggle"
-                                    aria-expanded="false">
-                                <span class="flex items-center gap-3">
-                                    <i class="fa-solid fa-clapperboard menu-icon w-4 text-center"></i>
-                                    <span class="menu-label truncate ml-2">Videos</span>
-                                </span>
-                                <i class="fas fa-chevron-right text-sm"></i>
-                            </button>
-
-                            <ul class="submenu mt-1 ml-3 space-y-1 max-h-0 overflow-hidden transition-[max-height] duration-300"
-                                aria-hidden="true">
-                                <li>
-                                    <a asp-controller="Video" asp-action="ClubVideos"
-                                           class="menu-item flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition">
-                                        <i class="fas fa-folder menu-icon w-4 text-center"></i>
-                                        <span class="menu-label truncate ml-2">Club Videos</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a asp-controller="Video" asp-action="PlayerVideos"
-                                           class="menu-item flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition">
-                                        <i class="fas fa-balance-scale menu-icon w-4 text-center"></i>
-                                        <span class="menu-label truncate ml-2">Player Videos</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a asp-controller="Video" asp-action="SeriesVideo"
-                                           class="menu-item flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition">
-                                        <i class="fas fa-warehouse menu-icon w-4 text-center"></i>
-                                        <span class="menu-label truncate ml-2">Series Video</span>
-                                    </a>
-                                </li>
-                            </ul>
+                        
+                        <li>
+                            <a asp-controller="Video" asp-action="Index"
+                                   class="menu-item group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition"
+                                   id="menu-video" role="link">
+                                <i class="fa-solid fa-clapperboard menu-icon menu-icon w-4 text-center"></i>
+                                <span class="menu-label truncate ml-2">Videos</span>
+                            </a>
                         </li>
 
                         <li class="relative has-submenu">
@@ -297,7 +241,7 @@
                             <ul class="submenu mt-1 ml-3 space-y-1 max-h-0 overflow-hidden transition-[max-height] duration-300"
                                 aria-hidden="true">
                                 <li>
-                                    <a href="/auth/all-user"
+                                    <a href="/en/auth/all-user"
                                            class="menu-item flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[#410544] transition">
                                         <i class="fa-solid fa-users-gear menu-icon w-4 text-center"></i>
                                         <span class="menu-label truncate ml-2">Users</span>
@@ -318,7 +262,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <form method="post" action="/auth/logout">
+                                    <form method="post" action="/en/auth/logout">
                                         @Html.AntiForgeryToken()
                                         <button type="submit"
                                                 class="menu-item flex items-center gap-3 px-3 py-2 rounded-md w-full hover:bg-[#410544] transition">

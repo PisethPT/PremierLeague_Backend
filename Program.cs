@@ -12,9 +12,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/auth/login";
-        options.LogoutPath = "/auth/logout";
-        options.AccessDeniedPath = "/auth/access-denied";
+        options.LoginPath = "/en/auth/login";
+        options.LogoutPath = "/en/auth/logout";
+        options.AccessDeniedPath = "/en/auth/access-denied";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
         options.SlidingExpiration = true;
 
@@ -72,7 +72,7 @@ app.UseMiddleware<ValidateUserMiddleware>();
 
 app.MapGet("/", context =>
 {
-    context.Response.Redirect("/auth/login");
+    context.Response.Redirect("/en/auth/login");
     return Task.CompletedTask;
 });
 

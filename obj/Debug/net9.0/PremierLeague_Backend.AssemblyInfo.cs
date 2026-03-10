@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PremierLeague_Backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+461bcd7770fcb79eef8ce4a010ffc75c721a7481")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5f566e0ff3f845bff4400b446f7b87c5b003b02b")]
 [assembly: System.Reflection.AssemblyProductAttribute("PremierLeague_Backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PremierLeague_Backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

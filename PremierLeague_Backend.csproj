@@ -11,7 +11,9 @@
     <Folder Include="Views\Goal\" />
     <Folder Include="Views\Lineup\" />
     <Folder Include="Views\MatchEvent\" />
+    <Folder Include="Views\News\" />
     <Folder Include="Views\PlayerStat\" />
+    <Folder Include="Views\Video\" />
     <Folder Include="wwwroot\json\" />
     <Folder Include="wwwroot\js\lineup\" />
     <Folder Include="wwwroot\js\matchEvent\" />

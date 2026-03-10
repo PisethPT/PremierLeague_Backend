@@ -25,13 +25,13 @@ public class ValidateUserMiddleware
                 if (user != null)
                 {
                     bool isLocked = user.LockoutEnabled
-                && user.LockoutEnd.HasValue
-                && user.LockoutEnd.Value > DateTimeOffset.UtcNow;
+                    && user.LockoutEnd.HasValue
+                    && user.LockoutEnd.Value > DateTimeOffset.UtcNow;
 
                     if (isLocked)
                     {
                         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                        context.Response.Redirect("/auth/login");
+                        context.Response.Redirect("en/auth/login");
                         return;
                     }
                 }
@@ -39,7 +39,7 @@ public class ValidateUserMiddleware
                 {
                     // User not found → logout
                     await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                    context.Response.Redirect("/auth/login");
+                    context.Response.Redirect("en/auth/login");
                     return;
                 }
             }

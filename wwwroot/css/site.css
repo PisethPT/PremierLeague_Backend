@@ -23,3 +23,29 @@ body {
 .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+#modalBox::-webkit-scrollbar {
+    width: 6px;
+}
+
+#modalBox::-webkit-scrollbar-track {
+    background: #1e0021;
+    border-radius: 10px;
+}
+
+#modalBox::-webkit-scrollbar-thumb {
+    background: #55005a;
+    border-radius: 10px;
+}
+
+#modalBox::-webkit-scrollbar-thumb:hover {
+    background: #8a3fbf;
+}
+
+#modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}

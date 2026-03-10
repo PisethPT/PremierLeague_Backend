@@ -7,12 +7,12 @@ public class PlayerDto
 {
     public int? PlayerId { get; set; }
 
-    [Required(ErrorMessage = "Please input player's first name.")]
+    // [Required(ErrorMessage = "Please input player's first name.")]
     [MaxLength(100)]
     [RegularExpression(@"^\S+(\s+\S+)*$", ErrorMessage = "First name cannot be empty or only whitespace.")]
     public string? FirstName { get; set; }
 
-    [Required(ErrorMessage = "Please input player's last name.")]
+    // [Required(ErrorMessage = "Please input player's last name.")]
     [MaxLength(100)]
     [RegularExpression(@"^\S+(\s+\S+)*$", ErrorMessage = "Last name cannot be empty or only whitespace.")]
     public string? LastName { get; set; }

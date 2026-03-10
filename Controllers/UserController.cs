@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace PremierLeague_Backend.Controllers
 {
-    [Route("auth")]
+    [Route("en/auth")]
     public class UserController : Controller
     {
         private readonly ILogger<UserController> _logger;
@@ -54,11 +54,11 @@ namespace PremierLeague_Backend.Controllers
 
                     // Build claims identity
                     var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.UserId!),
-                    new Claim(ClaimTypes.Name, user.Email!),
-                    new Claim(ClaimTypes.Email, user.Email!)
-                };
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId!),
+                        new Claim(ClaimTypes.Name, user.Email!),
+                        new Claim(ClaimTypes.Email, user.Email!)
+                    };
 
                     foreach (var role in roleDto.Roles)
                     {

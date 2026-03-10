@@ -5,7 +5,7 @@ using PremierLeague_Backend.Helper.SqlCommands;
 
 namespace PremierLeague_Backend.Controllers
 {
-    [Route("player-stats")]
+    [Route("en/player-stats")]
     public class PlayerStatController : Controller
     {
         private readonly ILogger<PlayerStatController> _logger;

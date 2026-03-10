@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace PremierLeague_Backend.Controllers
 {
     [Authorize]
-    [Route("clubs")]
+    [Route("en/clubs")]
     public class ClubController : Controller
     {
         private readonly IClubRepository _clubRepository;
@@ -22,7 +22,7 @@ namespace PremierLeague_Backend.Controllers
         }
 
         // GET: ClubController/Index
-        [HttpGet("all-club")]
+        [HttpGet]
         public async Task<ActionResult> Index()
         {
             viewModel.clubDtos = await _clubRepository.GetAllClubsAsync();

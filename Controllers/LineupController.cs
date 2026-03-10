@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace PremierLeague_Backend.Controllers
 {
-    [Route("lineups")]
+    [Route("en/lineups")]
     public class LineupController : Controller
     {
         private readonly ILogger<LineupController> _logger;

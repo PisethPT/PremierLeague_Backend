@@ -4,6 +4,7 @@ using PremierLeague_Backend.Models.SelectListItems;
 using PremierLeague_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using static PremierLeague_Backend.Helper.SqlCommands.SelectListItemCommands;
+using PremierLeague_Backend.Helper;
 
 namespace PremierLeague_Backend.Data.Repositories.Implementations;
 
@@ -65,6 +66,66 @@ public class SelectListItems : ISelectListItems
                         rdr.IsDBNull(rdr.GetOrdinal("PrimaryFormation")) ? "" : rdr.GetString(rdr.GetOrdinal("PrimaryFormation")),
                         rdr.IsDBNull(rdr.GetOrdinal("Tag")) ? "" : rdr.GetString(rdr.GetOrdinal("Tag"))
                     );
+                    SelectListItem.Add(item);
+
+                } while (await rdr.ReadAsync(ct));
+            }
+            return SelectListItem;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<List<SelectListItemHasImage>> SelectListItemHasImageAsync(string commandText, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = commandText;
+            using var rdr = await execute.ExecuteReaderAsync(cmd);
+            var SelectListItem = new List<SelectListItemHasImage>();
+            if (rdr is not null)
+            {
+                do
+                {
+                    var item = new SelectListItemHasImage
+                    {
+                        Value = rdr.SafeGetInt("Value"),
+                        Label = rdr.SafeGetString("Label"),
+                        Img = rdr.SafeGetString("Img")
+                    };
+                    SelectListItem.Add(item);
+
+                } while (await rdr.ReadAsync(ct));
+            }
+            return SelectListItem;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<List<SelectListItemHasSubtitle>> SelectListItemHasSubtitleAsync(string commandText, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = commandText;
+            using var rdr = await execute.ExecuteReaderAsync(cmd);
+            var SelectListItem = new List<SelectListItemHasSubtitle>();
+            if (rdr is not null)
+            {
+                do
+                {
+                    var item = new SelectListItemHasSubtitle
+                    {
+                        Value = rdr.SafeGetInt("Value"),
+                        Label = rdr.SafeGetString("Label"),
+                        Subtitle = rdr.SafeGetString("Subtitle")
+                    };
                     SelectListItem.Add(item);
 
                 } while (await rdr.ReadAsync(ct));

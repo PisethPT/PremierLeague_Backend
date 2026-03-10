@@ -42,9 +42,18 @@ public class MatchEventRepository : IMatchEventRepository
         }
     }
 
-    public Task<bool> DeleteMatchEventAsync(int matchEventId)
+    public async Task<bool> DeleteMatchEventAsync(int matchEventId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = DeleteMatchEventCommand;
+            cmd.Parameters.AddWithValue("@MatchEventId", matchEventId);
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }catch(SqlException ex)
+        {
+            throw new Exception($"Database error while deleting match event: {ex.Message}", ex);
+        }
     }
 
     public async Task<IEnumerable<PlayerStatGetPlayersDto>> GetAwayPlayersForPlayerStatByClubIdAndMatchIdAsync(int matchId, int clubId, CancellationToken ct = default)
@@ -169,6 +178,44 @@ public class MatchEventRepository : IMatchEventRepository
         }
     }
 
+    public async Task<MatchEventDto> FindMatchEventByIdAsync(int matchEventId, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = FindMatchEventByIdCommand;
+            cmd.Parameters.AddWithValue("@MatchEventId", matchEventId);
+            var rdr = await execute.ExecuteReaderAsync(cmd);    
+            var matchEvent = new MatchEventDto();
+            if (rdr is not null)
+            {
+                do
+                {
+                    matchEvent = new MatchEventDto{
+                        MatchEventId = rdr.SafeGetInt("MatchEventId"),
+                        MatchId = rdr.SafeGetInt("MatchId"),
+                        PlayerId = rdr.SafeGetInt("PlayerId"),
+                        ClubId = rdr.SafeGetInt("ClubId"),
+                        RelatedEventId = rdr.SafeGetInt("RelatedEventId"),
+                        EventTypeId = rdr.SafeGetInt("EventTypeId"),
+                        OutcomeId = rdr.SafeGetInt("OutcomeId"),
+                        Minute = rdr.SafeGetString("Minute"),
+                        IsPenalty = rdr.SafeGetBoolean("IsPenalty"),
+                        IsOwnGoal = rdr.SafeGetBoolean("IsOwnGoal"),
+                        IsInsideBox = rdr.SafeGetBoolean("IsInsideBox"),
+                        IsBigChance = rdr.SafeGetBoolean("IsBigChance"),
+                        IsWoodwork = rdr.SafeGetBoolean("IsWoodwork")
+                    };
+                } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
+            }
+            return matchEvent;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception($"Database error while fetching match events by match id: {ex.Message}", ex);
+        }
+    }
+
     public async Task<IEnumerable<MatchEventTypesDto>> GetMatchEventTypesAsync(int? matchId, CancellationToken ct = default)
     {
         try
@@ -184,8 +231,8 @@ public class MatchEventRepository : IMatchEventRepository
                 {
                     matchEventTypes.Add(new MatchEventTypesDto
                     {
-                        MatchEventId = rdr.SafeGetInt("MatchEventId"),
-                        MatchEventTypeName = rdr.SafeGetString("MatchEventTypeName")
+                        EventTypeId = rdr.SafeGetInt("EventTypeId"),
+                        EventTypeName = rdr.SafeGetString("EventTypeName")
                     });
                 } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
             }
@@ -197,8 +244,135 @@ public class MatchEventRepository : IMatchEventRepository
         }
     }
 
-    public Task<bool> UpdateMatchEventAsync(int matchEventId, MatchEventDto matchEventDto)
+    public async Task<bool> UpdateMatchEventAsync(int matchEventId, MatchEventDto matchEventDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = UpdateMatchEventCommand;
+            cmd.Parameters.AddWithValue("@MatchEventId", matchEventId);
+            cmd.Parameters.AddWithValue("@PlayerId", matchEventDto.PlayerId);
+            cmd.Parameters.AddWithValue("@RelatedEventId", matchEventDto.RelatedEventId);
+            cmd.Parameters.AddWithValue("@EventTypeId", matchEventDto.EventTypeId);
+            cmd.Parameters.AddWithValue("@OutcomeId", matchEventDto.OutcomeId);
+            cmd.Parameters.AddWithValue("@Minute", matchEventDto.Minute);
+            cmd.Parameters.AddWithValue("@IsPenalty", matchEventDto.IsPenalty);
+            cmd.Parameters.AddWithValue("@IsOwnGoal", matchEventDto.IsOwnGoal);
+            cmd.Parameters.AddWithValue("@IsInsideBox", matchEventDto.IsInsideBox);
+            cmd.Parameters.AddWithValue("@IsBigChance", matchEventDto.IsBigChance);
+            cmd.Parameters.AddWithValue("@IsWoodwork", matchEventDto.IsWoodwork);
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception($"Database error while updating match event: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<bool> FindExistingMatchEventPerClubIdAndMatchIdAsync(int clubId, int matchId, int playerId, string minute, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = FindExistingMatchEventPerClubIdAndMatchIdCommand;
+            cmd.Parameters.AddWithValue("@ClubId", clubId);
+            cmd.Parameters.AddWithValue("@MatchId", matchId);
+            cmd.Parameters.AddWithValue("@PlayerId", playerId);
+            cmd.Parameters.AddWithValue("@Minute", minute);
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }catch (SqlException ex)
+        {
+            throw new Exception($"Database error while fetching match event: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<bool> FindExistsMatchEventByMatchEventIdAsync(MatchEventDto matchEventDto, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = FindExistsMatchEventByMatchEventIdCommand;
+            cmd.Parameters.AddWithValue("@MatchEventId", matchEventDto.MatchEventId);
+            cmd.Parameters.AddWithValue("@MatchId", matchEventDto.MatchId);
+            cmd.Parameters.AddWithValue("@ClubId", matchEventDto.ClubId);
+            cmd.Parameters.AddWithValue("@PlayerId", matchEventDto.PlayerId);
+            cmd.Parameters.AddWithValue("@Minute", matchEventDto.Minute);
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }catch (SqlException ex)
+        {
+            throw new Exception($"Database error while fetching match event: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<IEnumerable<MatchEventTypesDto>> GetMatchEventsByMatchIdAsync(int matchId, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = GetMatchEventsByMatchIdCommand;
+            cmd.Parameters.AddWithValue("@MatchId", matchId);
+            var rdr = await execute.ExecuteReaderAsync(cmd);
+            var matchEventTypes = new List<MatchEventTypesDto>();
+            if (rdr is not null)
+            {
+                do
+                {
+                    matchEventTypes.Add(new MatchEventTypesDto
+                    {
+                        EventTypeId = rdr.SafeGetInt("EventTypeId"),
+                        EventTypeName = rdr.SafeGetString("EventTypeName")
+                    });
+                } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
+            }
+            return matchEventTypes;
+        }catch(SqlException ex)
+        {
+            throw new Exception($"Database error while fetching match events by match id: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<IEnumerable<MatchEventDetailDto>> GetMatchEventDetailByMatchIdAsync(int matchId, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = GetMatchEventsByMatchIdCommand;
+            cmd.Parameters.AddWithValue("@MatchId", matchId);
+            var rdr = await execute.ExecuteReaderAsync(cmd);
+            var matchEventDetails = new List<MatchEventDetailDto>();
+            if (rdr is not null)
+            {
+                do
+                {
+                    matchEventDetails.Add(new MatchEventDetailDto
+                    {
+                        MatchEventId = rdr.SafeGetInt("MatchEventId"),
+                        MatchId = rdr.SafeGetInt("MatchId"),
+                        ClubId = rdr.SafeGetInt("ClubId"),
+                        PlayerId = rdr.SafeGetInt("PlayerId"),
+                        EventTypeId = rdr.SafeGetInt("EventTypeId"),
+                        OutcomeId = rdr.SafeGetInt("OutcomeId"),
+                        MatchEventTypeName = rdr.SafeGetString("MatchEventTypeName"),
+                        OutcomeName = rdr.SafeGetString("OutcomeName"),
+                        ClubName = rdr.SafeGetString("ClubName"),
+                        ClubCrest = rdr.SafeGetString("ClubCrest"),
+                        ClubTheme = rdr.SafeGetString("ClubTheme"),
+                        FirstName = rdr.SafeGetString("FirstName"),
+                        LastName = rdr.SafeGetString("LastName"),
+                        Position = rdr.SafeGetString("Position"),
+                        PlayerNumber = rdr.SafeGetInt("PlayerNumber"),
+                        Photo = rdr.SafeGetString("Photo"),
+                        Minute = rdr.SafeGetString("Minute"),
+                        IsPenalty = rdr.SafeGetBoolean("IsPenalty"),
+                        IsOwnGoal = rdr.SafeGetBoolean("IsOwnGoal"),
+                        IsHomeClub = rdr.SafeGetBoolean("IsHomeClub")
+                    });
+                } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
+            }
+            return matchEventDetails;
+        }catch(SqlException ex)
+        {
+            throw new Exception($"Database error while fetching match event details by match id: {ex.Message}", ex);
+        }
     }
 }

@@ -1086,7 +1086,7 @@
         </table>
     </div>
 
-    <div class="@(ViewBag.TotalPages > 20 ? "flex" : "hidden") items-center mt-4 border-t-2 border-[#55005a] pt-4">
+    <div class="@(ViewBag.TotalCount > 20 ? "flex" : "hidden") items-center mt-4 border-t-2 border-[#55005a] pt-4">
         <div class="text-sm text-gray-400">
             Total Matches: @ViewBag.TotalCount
             Page @ViewBag.CurrentPage of @ViewBag.TotalPages

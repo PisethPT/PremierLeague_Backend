@@ -1,5 +1,5 @@
 /// <reference types="jquery" />
-const USER_BASE_CONTROLLER = "/auth";
+const USER_BASE_CONTROLLER = "/en/auth";
 const USER_ENDPOINT = {
   CREATE_USER_ENDPOINT: USER_BASE_CONTROLLER + "/create",
   UPDATE_USER_ENDPOINT: USER_BASE_CONTROLLER + "/update",

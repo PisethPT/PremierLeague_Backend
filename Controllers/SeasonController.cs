@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace PremierLeague_Backend.Controllers
 {
-    [Route("seasons")]
+    [Route("en/seasons")]
     public class SeasonController : Controller
     {
         private readonly ISeasonRepository repository;

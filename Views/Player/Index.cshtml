@@ -62,21 +62,21 @@
                 <label class="flex flex-col gap-2">
                     <span class="flex items-center gap-1">
                         <span class="text-white font-medium">First Name</span>
-                        <span class="text-red-400">*</span>
+                        @* <span class="text-red-400">*</span> *@
                     </span>
                     <input id="firstName" asp-for="PlayerDto.FirstName" type="text"
                            class="bg-[#55005a] text-white placeholder:text-gray-500 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#8a3fbf]" />
-                    <span asp-validation-for="PlayerDto.FirstName" class="text-red-400 text-sm"></span>
+                    @* <span asp-validation-for="PlayerDto.FirstName" class="text-red-400 text-sm"></span> *@
                 </label>
 
                 <label class="flex flex-col gap-2">
                     <span class="flex items-center gap-1">
                         <span class="text-white font-medium">Last Name</span>
-                        <span class="text-red-400">*</span>
+                        @* <span class="text-red-400">*</span> *@
                     </span>
                     <input id="lastName" asp-for="PlayerDto.LastName" type="text"
                            class="bg-[#55005a] text-white placeholder:text-gray-500 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#8a3fbf]" />
-                    <span asp-validation-for="PlayerDto.LastName" class="text-red-400 text-sm"></span>
+                    @* <span asp-validation-for="PlayerDto.LastName" class="text-red-400 text-sm"></span> *@
                 </label>
 
                 <label class="flex flex-col gap-2">
@@ -190,7 +190,8 @@
 
                     <div id="dropZone" class="relative flex flex-col items-center justify-center gap-3 border-2 border-dashed border-white/20 rounded-lg p-4 bg-white/3 cursor-pointer
                         hover:border-white/40 transition">
-                        <input id="fileInput" asp-for="PlayerDto.PhotoFile" type="file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        <input id="fileInput" asp-for="PlayerDto.PhotoFile" type="file" accept="image/*"
+                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                aria-label="Upload user photo">
                             <span asp-validation-for="PlayerDto.PhotoFile"></span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white/80" fill="none"
@@ -226,7 +227,8 @@
                 </div>
 
                 <div class="mt-6 flex flex-col md:flex-row justify-between gap-3">
-                    <div class="text-sm text-gray-200/80">Fields with <span class="text-red-400">*</span> are required.</div>
+                    <div class="text-sm text-gray-200/80">Fields with <span class="text-red-400">*</span> are required.
+                    </div>
                     <div class="flex gap-3">
                         <button type="reset" id="resetBtn"
                                 class="text-white px-4 py-2 bg-[#410544] rounded-lg hover:bg-[#55005a] transition hover:ring-2 hover:!ring-[#8a3fbf]">Reset</button>
@@ -736,185 +738,189 @@
                                 class="flex justify-center items-center gap-1 text-white text-center text-sm w-fit px-3 py-2 rounded-[10px] bg-transparent border-[#624d64] border-2 text-nowrap hover:bg-[#654c6818] cursor-pointer hover:ring-2 hover:!ring-[#8a3fbf]">
                             @{
                                 if (Model.SelectedClubIds != null && Model.SelectedClubIds.Count > 0)
-                                                    {
-                                                    if(Model.SelectedClubIds.Count > 1){
-                                <text>@Model.SelectListItemClubs.FirstOrDefault(c => c.ClubId ==
-                                                            Model.SelectedClubIds.First())?.ClubName +@(Model.SelectedClubIds.Count - 1) </text>
-                                                    }
-                                                    else
                                 {
-                                    <text>@Model.SelectListItemClubs.FirstOrDefault(c => c.ClubId ==
-                                                                Model.SelectedClubIds.First())?.ClubName</text>
-                                                        ;
-                                }
-                                                    }
+                                    if (Model.SelectedClubIds.Count > 1)
+                                    {
+                                        <text>@Model.SelectListItemClubs.FirstOrDefault(c => c.ClubId ==
+                                                                                                        Model.SelectedClubIds.First())?.ClubName +@(Model.SelectedClubIds.Count - 1) </text>
+                                        }
                                                     else
-                                {
-                                    <text>Clubs</text>
-                                }
-                            }
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </button>
+                                        {
+                                            <text>@Model.SelectListItemClubs.FirstOrDefault(c => c.ClubId ==
+                                                                                                                Model.SelectedClubIds.First())?.ClubName</text>
+                                                ;
+                                            }
+                                        }
+                                                    else
+                                        {
+                                            <text>Clubs</text>
+                                        }
+                                    }
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </button>
 
-                        <button id="positionBtnId"
-                                class="flex justify-center items-center gap-1 text-white text-center text-sm w-fit px-3 py-2 rounded-[10px] bg-transparent border-[#624d64] border-2 text-nowrap hover:bg-[#654c6818] cursor-pointer hover:ring-2 hover:!ring-[#8a3fbf]">
-                            Position
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </button>
+                                <button id="positionBtnId"
+                                        class="flex justify-center items-center gap-1 text-white text-center text-sm w-fit px-3 py-2 rounded-[10px] bg-transparent border-[#624d64] border-2 text-nowrap hover:bg-[#654c6818] cursor-pointer hover:ring-2 hover:!ring-[#8a3fbf]">
+                                    Position
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </button>
 
-                        <form asp-action="Index" asp-controller="Player" method="get">
-                            @{
-                                bool isReset = Model.SelectedClubIds?.Count > 0 || Model.SelectedPositions.Count > 0 ? true : false;
-                            }
-                            <button type="submit" @(isReset ? "" : "disabled")
-                                    class="flex justify-center items-center gap-1 text-white text-center text-sm w-fit px-3 py-2 rounded-[10px] bg-transparent border-[#624d64] border-2 text-nowrap hover:bg-[#654c6818] hover:ring-2 hover:!ring-[#8a3fbf] @(isReset ? "" : "opacity-50 cursor-not-allowed pointer-events-none")">
-                                Reset
-                                <i class="fa-solid fa-arrow-rotate-left"></i>
-                            </button>
-                        </form>
+                                <form asp-action="Index" asp-controller="Player" method="get">
+                                    @{
+                                        bool isReset = Model.SelectedClubIds?.Count > 0 || Model.SelectedPositions.Count > 0 ? true : false;
+                                    }
+                                    <button type="submit" @(isReset ? "" : "disabled")
+                                            class="flex justify-center items-center gap-1 text-white text-center text-sm w-fit px-3 py-2 rounded-[10px] bg-transparent border-[#624d64] border-2 text-nowrap hover:bg-[#654c6818] hover:ring-2 hover:!ring-[#8a3fbf] @(isReset ? "" : "opacity-50 cursor-not-allowed pointer-events-none")">
+                                        Reset
+                                        <i class="fa-solid fa-arrow-rotate-left"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <input type="text"
+                                   class="text-white bg-transparent !w-full lg:!w-[500px] ml-auto px-4 py-2 border-[#624d64] border-2 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#8a3fbf]"
+                                   placeholder="Search Players..." id="playerSearchInput" onkeyup="filterPlayer()" />
+                        </div>
                     </div>
 
-                    <input type="text"
-                           class="text-white bg-transparent !w-full lg:!w-[500px] ml-auto px-4 py-2 border-[#624d64] border-2 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#8a3fbf]"
-                           placeholder="Search Players..." id="playerSearchInput" onkeyup="filterPlayer()" />
-                </div>
-            </div>
-
-            <div class="overflow-x-scroll scrollbar-none">
-                <table class="min-w-full divide-y divide-[#55005a] rounded-lg overflow-hidden">
-                                        <thead class="bg-[#55005a]">
-                                            <tr>
-                                                <th class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">ID</th>
-                                                <th class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">Action
-                                                </th>
-                                                <th class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">Photo</th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Name</th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Position
-                                                </th>
+                    <div class="overflow-x-scroll scrollbar-none">
+                        <table class="min-w-full divide-y divide-[#55005a] rounded-lg overflow-hidden">
+                            <thead class="bg-[#55005a]">
+                                <tr>
+                                    <th class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">ID</th>
+                                    <th class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">Action
+                                    </th>
+                                    <th class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">Photo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Position
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                                        Player Number</th>
+                                        <th class="px-2 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                                            Preferred Foot</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Height</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                                                Date of Birth</th>
                                                 <th
                                                     class="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
-                                                    Player Number</th>
-                                                    <th class="px-2 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
-                                                        Preferred Foot</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Height</th>
+                                                    Place of Birth</th>
+                                                    <th
+                                                        class="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
+                                                        Nationality</th>
+                                                        <th class="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider ">Club</th>
                                                         <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
-                                                            Date of Birth</th>
-                                                            <th
-                                                                class="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
-                                                                Place of Birth</th>
-                                                                <th
-                                                                    class="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider text-nowrap">
-                                                                    Nationality</th>
-                                                                    <th class="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider ">Club</th>
-                                                                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider text-nowrap">
-                                                                        Joined Club</th>
-                                                                    </tr>
-                                                                </thead>
-                                            <tbody class="bg-transparent divide-y divide-[#55005a]">
-                                                @foreach (var player in Model.PlayerDetailDtos)
-                                                {
-                                                    index++;
-                                                    <tr>
-                                                        <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
-                                                            <div class="flex justify-center items-center">
-                                                                <div
-                                                                    class="w-8 h-8 text-white text-sm font-bold text-center flex justify-center items-center bg-[#55005a] rounded-full ring-2 !ring-[#8a3fbf]">
-                                                                    @index</div>
-                                                                </div>
-                                                            </td>
-
-                                                            <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
-                                                                <div class="flex justify-center items-center gap-2">
-                                                                    <button onclick="attachPlayerByIdForUpdate('@player.PlayerId')"
-                                                                            class="w-9 h-9 text-white text-sm font-bold text-center flex justify-center items-center bg-[#8a3fbf] hover:bg-[#6b2fa0] rounded-xl hover:ring-2 hover:!ring-[#8a3fbf]">
-                                                                        <i class="fa-solid fa-pencil"></i>
-                                                                    </button>
-                                                                    <button onclick="showModal('confirmDeleteModal', this, 'modal-lg', true)"
-                                                                            class="w-9 h-9 text-white text-sm font-bold text-center flex justify-center items-center bg-red-500 hover:bg-red-600 rounded-xl hover:ring-2 hover:!ring-[#8a3fbf]">
-                                                                        <input type="text" name="playerId" value="@player.PlayerId" hidden />
-                                                                        <input type="text" name="firstName" value="@player.FirstName" hidden />
-                                                                        <input type="text" name="lastName" value="@player.LastName" hidden />
-                                                                        <input type="text" name="position" value="@player.Position" hidden />
-                                                                        <input type="text" name="playerNumber" value="@player.PlayerNumber" hidden />
-                                                                        <input type="text" name="photo" value="@player.Photo" hidden />
-                                                                        <input type="text" name="clubTheme" value="@player.ClubTheme" hidden />
-                                                                        <input type="text" name="clubName" value="@player.ClubName" hidden />
-                                                                        <input type="text" name="clubCrest" value="@player.ClubCrest" hidden />
-                                                                        <i class="fa-solid fa-circle-minus"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-
-                                                            <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
-                                                                <div class="flex justify-center items-center">
-                                                                    <div class="flex justify-center items-center w-14 h-14 shadow rounded-2xl overflow-hidden"
-                                                                         style="background-color: @player.ClubTheme;">
-                                                                        <img src="~/upload/players/@(string.IsNullOrEmpty(player.Photo) ? "placeholder.png" : player.Photo)"
-                                                                             class="w-auto h-[4rem] mt-5 object-contain cursor-pointer"
-                                                                             alt="@player.FirstName @player.LastName" />
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-
-                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@player.FirstName @player.LastName</td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@(player.Position == Position.None ? "" : player.Position)</td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white text-center">@(player.PlayerNumber == 0 ? "" : player.PlayerNumber)</td>
-                                                            <td class="px-2 py-4 whitespace-nowrap text-sm text-white">@(player.PreferredFoot == PreferredFoot.None ? "" :  player.PreferredFoot)</td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@player.Height</td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@player.DateOfBirth</td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white text-center">@player.PlaceOfBirth</td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white text-center">
-                                                                <div class="flex flex-col gap-2 items-center">
-                                                                    <img src="@player.NationalityIcon" class="w-[26px] h-auto object-contain cursor-pointer"
-                                                                         alt="@player.Nationality" />
-                                                                    <span>@player.Nationality</span>
-                                                                </div>
-                                                            </td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                                                <div class="flex flex-col gap-2 items-center">
-                                                                    <img src="~/upload/clubs/@(string.IsNullOrEmpty(player.ClubCrest) ? "" : player.ClubCrest)"
-                                                                         class="w-auto h-7 object-contain cursor-pointer" alt="@player.ClubName" />
-                                                                    <span>@player.ClubName</span>
-                                                                </div>
-                                                            </td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                                                @player.JoinedClub
-                                                            </td>
+                                                            Joined Club</th>
                                                         </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                    </thead>
+                                                    <tbody class="bg-transparent divide-y divide-[#55005a]">
+                                                        @foreach (var player in Model.PlayerDetailDtos)
+                                                        {
+                                                            index++;
+                                                            <tr>
+                                                                <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
+                                                                    <div class="flex justify-center items-center">
+                                                                        <div
+                                                                            class="w-8 h-8 text-white text-sm font-bold text-center flex justify-center items-center bg-[#55005a] rounded-full ring-2 !ring-[#8a3fbf]">
+                                                                            @index</div>
+                                                                        </div>
+                                                                    </td>
 
-                                        <div class="flex items-center mt-4 border-t-2 border-[#55005a] pt-4">
-                                            <div class="text-sm text-gray-400">
-                                                Total Player: @ViewBag.TotalCount
-                                                Page @ViewBag.CurrentPage of @ViewBag.TotalPages
-                                            </div>
+                                                                    <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
+                                                                        <div class="flex justify-center items-center gap-2">
+                                                                            <button onclick="attachPlayerByIdForUpdate('@player.PlayerId')"
+                                                                                    class="w-9 h-9 text-white text-sm font-bold text-center flex justify-center items-center bg-[#8a3fbf] hover:bg-[#6b2fa0] rounded-xl hover:ring-2 hover:!ring-[#8a3fbf]">
+                                                                                <i class="fa-solid fa-pencil"></i>
+                                                                            </button>
+                                                                            <button onclick="showModal('confirmDeleteModal', this, 'modal-lg', true)"
+                                                                                    class="w-9 h-9 text-white text-sm font-bold text-center flex justify-center items-center bg-red-500 hover:bg-red-600 rounded-xl hover:ring-2 hover:!ring-[#8a3fbf]">
+                                                                                <input type="text" name="playerId" value="@player.PlayerId" hidden />
+                                                                                <input type="text" name="firstName" value="@player.FirstName" hidden />
+                                                                                <input type="text" name="lastName" value="@player.LastName" hidden />
+                                                                                <input type="text" name="position" value="@player.Position" hidden />
+                                                                                <input type="text" name="playerNumber" value="@player.PlayerNumber" hidden />
+                                                                                <input type="text" name="photo" value="@player.Photo" hidden />
+                                                                                <input type="text" name="clubTheme" value="@player.ClubTheme" hidden />
+                                                                                <input type="text" name="clubName" value="@player.ClubName" hidden />
+                                                                                <input type="text" name="clubCrest" value="@player.ClubCrest" hidden />
+                                                                                <i class="fa-solid fa-circle-minus"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </td>
 
-                                            <div class="ml-auto flex items-center gap-4">
-                                                <a href="@Url.Action("Index", "Player", new { page = ViewBag.CurrentPage - 1, positions = Model.SelectedPositions, clubIds = Model.SelectedClubIds })"
-                                                       class="px-3 py-1 rounded bg-[#55005a] text-white transition
-                                                    @(ViewBag.CurrentPage == 1 ? "opacity-50 cursor-not-allowed pointer-events-none" : "hover:bg-[#410544] hover:ring-2 hover:!ring-[#8a3fbf]")"
-                                                       aria-disabled="@(currentPage == 1)">
-                                                    <i class="fa-solid fa-chevron-left"></i>
-                                                </a>
+                                                                    <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
+                                                                        <div class="flex justify-center items-center">
+                                                                            <div class="flex justify-center items-center w-14 h-14 shadow rounded-2xl overflow-hidden"
+                                                                                 style="background-color: @player.ClubTheme;">
+                                                                                <img src="~/upload/players/@(string.IsNullOrEmpty(player.Photo) ? "placeholder.png" : player.Photo)"
+                                                                                     class="w-auto h-[4rem] mt-5 object-contain cursor-pointer"
+                                                                                     alt="@player.FirstName @player.LastName" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
 
-                                                <a href="@Url.Action("Index", "Player", new { page = ViewBag.CurrentPage + 1, positions = Model.SelectedPositions, clubIds = Model.SelectedClubIds })"
-                                                       class="px-3 py-1 rounded bg-[#55005a] text-white transition
-                                                    @(ViewBag.CurrentPage == @ViewBag.TotalPages ? "opacity-50 cursor-not-allowed pointer-events-none" : "hover:bg-[#410544] hover:ring-2 hover:!ring-[#8a3fbf]")"
-                                                       aria-disabled="@(ViewBag.CurrentPage == ViewBag.TotalPages)">
-                                                    <i class="fa-solid fa-chevron-right"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
+                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@player.FirstName @player.LastName</td>
+                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@(player.Position == Position.None ? "" :
+                                                                                                player.Position)</td>
+                                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-white text-center">@(player.PlayerNumber == 0 ?
+                                                                                                   "" : player.PlayerNumber)</td>
+                                                                            <td class="px-2 py-4 whitespace-nowrap text-sm text-white">@(player.PreferredFoot ==
+                                                                                                        PreferredFoot.None ? "" : player.PreferredFoot)</td>
+                                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@player.Height</td>
+                                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@player.DateOfBirth</td>
+                                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-white text-center">@player.PlaceOfBirth</td>
+                                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-white text-center">
+                                                                                    <div class="flex flex-col gap-2 items-center">
+                                                                                        <img src="@player.NationalityIcon" class="w-[26px] h-auto object-contain cursor-pointer"
+                                                                                             alt="@player.Nationality" />
+                                                                                        <span>@player.Nationality</span>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                                                                    <div class="flex flex-col gap-2 items-center">
+                                                                                        <img src="~/upload/clubs/@(string.IsNullOrEmpty(player.ClubCrest) ? "" : player.ClubCrest)"
+                                                                                             class="w-auto h-7 object-contain cursor-pointer" alt="@player.ClubName" />
+                                                                                        <span>@player.ClubName</span>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                                                                    @player.JoinedClub
+                                                                                </td>
+                                                                            </tr>
+                                                                        }
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
 
-                                    @section Scripts {
-                                        <partial name="_ValidationScriptsPartial" />
-                                        <script src="~/js/player/index.js" asp-append-version="true"></script>
-                                        <script src="~/js/player/custom_select.js" asp-append-version="true"></script>
-                                        <script src="~/js/player/filter.js" asp-append-version="true"></script>
-                                        <script src="~/js/player/delete.js" asp-append-version="true"></script>
-                                        <script src="~/js/player/nationality.js" asp-append-version="true"></script>
-                                    }
+                                                            <div class="flex items-center mt-4 border-t-2 border-[#55005a] pt-4">
+                                                                <div class="text-sm text-gray-400">
+                                                                    Total Player: @ViewBag.TotalCount
+                                                                    Page @ViewBag.CurrentPage of @ViewBag.TotalPages
+                                                                </div>
+
+                                                                <div class="ml-auto flex items-center gap-4">
+                                                                    <a href="@Url.Action("Index", "Player", new { page = ViewBag.CurrentPage - 1, positions = Model.SelectedPositions, clubIds = Model.SelectedClubIds })"
+                                                                           class="px-3 py-1 rounded bg-[#55005a] text-white transition
+                                                                        @(ViewBag.CurrentPage == 1 ? "opacity-50 cursor-not-allowed pointer-events-none" : "hover:bg-[#410544] hover:ring-2 hover:!ring-[#8a3fbf]")"
+                                                                           aria-disabled="@(currentPage == 1)">
+                                                                        <i class="fa-solid fa-chevron-left"></i>
+                                                                    </a>
+
+                                                                    <a href="@Url.Action("Index", "Player", new { page = ViewBag.CurrentPage + 1, positions = Model.SelectedPositions, clubIds = Model.SelectedClubIds })"
+                                                                           class="px-3 py-1 rounded bg-[#55005a] text-white transition
+                                                                        @(ViewBag.CurrentPage == @ViewBag.TotalPages ? "opacity-50 cursor-not-allowed pointer-events-none" : "hover:bg-[#410544] hover:ring-2 hover:!ring-[#8a3fbf]")"
+                                                                           aria-disabled="@(ViewBag.CurrentPage == ViewBag.TotalPages)">
+                                                                        <i class="fa-solid fa-chevron-right"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        @section Scripts {
+                                                            <partial name="_ValidationScriptsPartial" />
+                                                            <script src="~/js/player/index.js" asp-append-version="true"></script>
+                                                            <script src="~/js/player/custom_select.js" asp-append-version="true"></script>
+                                                            <script src="~/js/player/filter.js" asp-append-version="true"></script>
+                                                            <script src="~/js/player/delete.js" asp-append-version="true"></script>
+                                                            <script src="~/js/player/nationality.js" asp-append-version="true"></script>
+                                                        }
