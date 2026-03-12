@@ -22,22 +22,46 @@ namespace PremierLeague_Backend.Controllers
 
         // GET: LineupController
         [HttpGet]
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> IndexAsync(int? page = 1)
         {
-            viewModel.SelectListItemMatchForLineups = await selectList.SelectListItemMatchForLineupAsync();
-            return View(viewModel);
+            try
+            {
+                viewModel.LineupDetailDto = await repository.GetAllLineupsAsync(page);
+                viewModel.SelectListItemMatchForLineups = await selectList.SelectListItemMatchForLineupAsync();
+                ViewBag.TotalCount = viewModel.LineupDetailDto.Count();
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalPages = (int)Math.Ceiling((double)ViewBag.TotalCount / 20);
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading lineup");
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(viewModel);
+            }
         }
 
+        // POST: LineupController/Create
         [HttpPost("create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateAsync()
         {
-            return View(nameof(Index));
+            try
+            {
+                return View(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating lineup");
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(viewModel);
+            }
         }
 
+        // GET: LineupController/GetFormations
         [HttpGet("get-formations")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GetFormations()
+        public async Task<ActionResult> GetFormationsAsync()
         {
             try
             {
@@ -68,9 +92,96 @@ namespace PremierLeague_Backend.Controllers
             }
         }
 
-        [HttpPost("get-players-by-match/{matchId}")]
+        // POST: LineupController/GetLineupClubInfoByMatch
+        [HttpGet("get-lineup-club-info-by-match/{matchId:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GetPlayersByMatchAsync([FromRoute] int matchId)
+        public async Task<JsonResult> GetLineupClubInfoByMatchAsync([FromRoute] int matchId)
+        {
+            try
+            {
+                var LineupClubInfo = await repository.GetLineupClubInfoByMatchIdAsync(matchId);
+                if (LineupClubInfo is null)
+                {
+                    return Json(new
+                    {
+                        StatusCode = 404,
+                        Message = $"Lineup club information not found. by matchId {matchId}",
+                    });
+                }
+
+                return Json(
+                    new
+                    {
+                        StatusCode = 200,
+                        Data = new
+                        {
+                            LineupClubInfo
+                        },
+                        Message = "Commit Transaction Success."
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading players by match Id");
+                return Json(
+                    new
+                    {
+                        StatusCode = 400,
+                        Message = ex.Message,
+                    }
+                );
+            }
+        }
+
+        // POST: LineupController/GetLineupClubInfoByMatch
+        [HttpGet("get-lineup-formation-detail-by-match/{matchId:int}")]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> GetLineupFormationDetailByMatchAsync([FromRoute] int matchId)
+        {
+            try
+            {
+                var LineupFormation = await repository.GetLineupFormationByMatchIdAsync(matchId);
+                var SubstitutionFormation = await repository.GetSubstitutionFormationByMatchIdAsync(matchId);
+                if (LineupFormation is null || SubstitutionFormation is null)
+                {
+                    return Json(new
+                    {
+                        StatusCode = 404,
+                        Message = $"Lineup information detail not found. by matchId {matchId}",
+                    });
+                }
+
+                return Json(
+                    new
+                    {
+                        StatusCode = 200,
+                        Data = new
+                        {
+                            LineupFormation,
+                            SubstitutionFormation
+                        },
+                        Message = "Commit Transaction Success."
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading players by match Id");
+                return Json(
+                    new
+                    {
+                        StatusCode = 400,
+                        Message = ex.Message,
+                    }
+                );
+            }
+        }
+
+        // POST: LineupController/GetPlayersByMatch
+        [HttpGet("get-players-by-match/{matchId:int}")]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> GetPlayersByMatchAsync([FromRoute] int matchId)
         {
             try
             {
@@ -108,6 +219,5 @@ namespace PremierLeague_Backend.Controllers
                 );
             }
         }
-
     }
 }

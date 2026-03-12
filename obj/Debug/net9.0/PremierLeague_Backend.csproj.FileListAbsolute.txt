@@ -212,7 +212,6 @@ D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\9o1goejipu
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\p9ehnj6zmc-{0}-ikce0ey915-ikce0ey915.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\3iplzogm56-{0}-ijtb5s4i4l-ijtb5s4i4l.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\xiz61mo3n1-{0}-f896zcctej-f896zcctej.gz
-D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\lgawskl5ey-{0}-pgupl4wez3-pgupl4wez3.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\5n2x9jiqyo-{0}-n3xsn1vkg7-n3xsn1vkg7.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\yrsy3mj9qs-{0}-hihsdgqt68-hihsdgqt68.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\8xxjurc5ny-{0}-a257i5cuf1-a257i5cuf1.gz
@@ -302,7 +301,6 @@ D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\staticwebassets.build
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\swae.build.ex.cache
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\dizf7fm1d9-{0}-e4z533pjhk-e4z533pjhk.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\fog4glwko6-{0}-76njmqj9ng-76njmqj9ng.gz
-D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\rggb4mrb6h-{0}-6rn02hge94-6rn02hge94.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\6xujppcjd3-{0}-7e7001p7xf-7e7001p7xf.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\bnj19zf37d-{0}-etn8jb4sk6-etn8jb4sk6.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\6vmm77fuoh-{0}-jfon8s7bch-jfon8s7bch.gz
@@ -315,3 +313,5 @@ D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\2njwnv58n2
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\11xcrxmlxm-{0}-uz3q5777t5-uz3q5777t5.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\v6iox2w7u0-{0}-969skrnest-969skrnest.gz
 D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\g1wdbtn1gc-{0}-ftyryx3fwj-ftyryx3fwj.gz
+D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\lgawskl5ey-{0}-5k6cxzhtxa-5k6cxzhtxa.gz
+D:\Term-5 Cource\PL\PremierLeague_Backend\obj\Debug\net9.0\compressed\rggb4mrb6h-{0}-7xs4783lpj-7xs4783lpj.gz

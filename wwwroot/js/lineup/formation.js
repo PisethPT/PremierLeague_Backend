@@ -215,7 +215,7 @@ function renderBench(side) {
 
 (async () => {
   $.ajax({
-    url: "/lineups/get-formations",
+    url: "/en/lineups/get-formations",
     method: "GET",
     headers: {
       RequestVerificationToken: $(
