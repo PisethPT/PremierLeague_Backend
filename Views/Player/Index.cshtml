@@ -860,12 +860,12 @@
                                                                     </td>
 
                                                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@player.FirstName @player.LastName</td>
-                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@(player.Position == Position.None ? "" :
+                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@(player.Position == Position.Unknown ? "" :
                                                                                                 player.Position)</td>
                                                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-white text-center">@(player.PlayerNumber == 0 ?
                                                                                                    "" : player.PlayerNumber)</td>
                                                                             <td class="px-2 py-4 whitespace-nowrap text-sm text-white">@(player.PreferredFoot ==
-                                                                                                        PreferredFoot.None ? "" : player.PreferredFoot)</td>
+                                                                                                        PreferredFoot.Unknown ? "" : player.PreferredFoot)</td>
                                                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@player.Height</td>
                                                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-white">@player.DateOfBirth</td>
                                                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-white text-center">@player.PlaceOfBirth</td>

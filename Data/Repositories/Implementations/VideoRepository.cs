@@ -69,21 +69,8 @@ public class VideoRepository : IVideoRepository
             cmd.CommandText = FindVideoExistingCommand;
             cmd.Parameters.AddWithValue("@VideoId", videoId);
             cmd.Parameters.AddWithValue("@Title", videoDto.Title);
-            cmd.Parameters.AddWithValue("@Description", videoDto.Description);
-            cmd.Parameters.AddWithValue("@Channel", videoDto.Channel);
-            cmd.Parameters.AddWithValue("@ThumbnailUrl", videoDto.ThumbnailUrl);
-            cmd.Parameters.AddWithValue("@VideoUrl", videoDto.VideoUrl);
             cmd.Parameters.AddWithValue("@VideoCategoryId", videoDto.VideoCategoryId);
-            cmd.Parameters.AddWithValue("@DurationSeconds", videoDto.DurationSeconds);
-            cmd.Parameters.AddWithValue("@Publisher", videoDto.Publisher);
             cmd.Parameters.AddWithValue("@PublishedDate", videoDto.PublishedDate);
-            cmd.Parameters.AddWithValue("@ExpiryDate", videoDto.ExpiryDate);
-            cmd.Parameters.AddWithValue("@IsFeatured", videoDto.IsFeatured);
-            cmd.Parameters.AddWithValue("@IsActive", videoDto.IsActive);
-            cmd.Parameters.AddWithValue("@MatchId", videoDto.MatchId);
-            cmd.Parameters.AddWithValue("@ClubId", videoDto.ClubId);
-            cmd.Parameters.AddWithValue("@PlayerId", videoDto.PlayerId);
-            cmd.Parameters.AddWithValue("@SeasonId", videoDto.SeasonId);
             return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
         }
         catch (Exception ex)
@@ -119,8 +106,8 @@ public class VideoRepository : IVideoRepository
                     ExpiryDate = rdr.SafeGetString("ExpiryDate"),
                     IsFeatured = rdr.SafeGetBoolean("IsFeatured"),
                     IsActive = rdr.SafeGetBoolean("IsActive")
-                });   
-            }while(await rdr.ReadAsync(ct).ConfigureAwait(false));
+                });
+            } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
             return videos;
         }
         catch (Exception ex)
@@ -136,7 +123,7 @@ public class VideoRepository : IVideoRepository
             var cmd = new SqlCommand();
             cmd.CommandText = GetVideoByIdCommand;
             cmd.Parameters.AddWithValue("@VideoId", videoId);
-            var rdr = await execute.ExecuteReaderAsync(cmd); 
+            var rdr = await execute.ExecuteReaderAsync(cmd);
             var video = new VideoDto();
             do
             {
@@ -160,7 +147,7 @@ public class VideoRepository : IVideoRepository
                     IsFeatured = rdr.SafeGetBoolean("IsFeatured"),
                     IsActive = rdr.SafeGetBoolean("IsActive")
                 };
-            } while(await rdr.ReadAsync(ct).ConfigureAwait(false));
+            } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
 
             return video;
         }

@@ -9,8 +9,9 @@ public static class SelectListItemCommands
     public static string SelectListItemRefereeRoleCommands => "PL_SelectListItemRefereeRole";
     public static string SelectListItemRefereeBadgeLevelCommands => "PL_SelectListItemRefereeBadgeLevel";
     public static string SelectListItemMatchForLineupCommands => "PL_SelectListItemMatchForLineup";
+    public static string SelectListItemMatchCommands => "PL_SelectListItemMatch";
     public static string SelectListItemFormationCommands => "PL_SelectListItemFormation";
-    
+
     // Match Select List Items
     public static string SelectListItemMatchWeekCommandText => "PL_CommandSelectListItemMatchWeek";
     public static string SelectListItemSeasonCommandText => "PL_CommandSelectListItemSeason";

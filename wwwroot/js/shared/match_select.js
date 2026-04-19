@@ -180,6 +180,9 @@ export const MatchSelect = (function () {
       homeImg.src = it.homeImg;
       awayImg.src = it.awayImg;
 
+      homeImg.classList.remove("hidden");
+      awayImg.classList.remove("hidden");
+
       homeBox.classList.remove("hidden");
       awayBox.classList.remove("hidden");
 
@@ -206,10 +209,27 @@ export const MatchSelect = (function () {
         label.textContent = it.label;
         homeImg.src = it.homeImg;
         awayImg.src = it.awayImg;
-        homeImg.classList.remove("hidden");
-        awayImg.classList.remove("hidden");
+        homeBox.classList.remove("hidden");
+        awayBox.classList.remove("hidden");
         selectEl.value = value;
         return true;
+      },
+      reset() {
+        selected = null;
+        label.textContent = cfg.placeholder;
+
+        homeBox.classList.add("hidden");
+        awayBox.classList.add("hidden");
+
+        homeImg.src = "";
+        awayImg.src = "";
+
+        panel.classList.remove("mt-[60px]");
+        panel.classList.add("mt-[46px]");
+
+        selectEl.value = "";
+
+        renderList(ul, items, cfg, null);
       },
     };
   }

@@ -33,7 +33,15 @@ document.addEventListener("DOMContentLoaded", function () {
 const resetForm = () => {
   let form = $("#videoForm");
   form[0].reset();
-  form.find("input[type='hidden']").val("");
+  form.find("input").not("[name='__RequestVerificationToken']").val("");
+  form.find("textarea").val("");
+
+  form.find("select.js-custom-select").each(function () {
+    const placeholder = $(this).data("placeholder") || "Please select";
+    const $btn = $(this).parent().find("button");
+    $btn.find("img").addClass("hidden");
+    $btn.find("span.truncate.block").text(placeholder);
+  });
   window.selectCategoryInst.setValue("");
 
   // Refresh counters
@@ -54,6 +62,12 @@ $("#btnAddVideo").on("click", function () {
   const expiry = new Date();
   expiry.setFullYear(expiry.getFullYear() + 1);
   $("#expiryDate").val(expiry.toISOString().split("T")[0]);
+
+  $("#isFeatured").prop("checked", false);
+  $("#isFeaturedHidden").val("false");
+
+  $("#isActive").prop("checked", true);
+  $("#isActiveHidden").val("true");
 
   openModal("modal-8xl", true);
 });

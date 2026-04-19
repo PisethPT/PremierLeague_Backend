@@ -138,19 +138,55 @@ public class SelectListItems : ISelectListItems
         }
     }
 
-    public async Task<List<SelectListItemMatchForLineup>> SelectListItemMatchForLineupAsync(CancellationToken ct = default)
+    public async Task<List<SelectListItemMatch>> SelectListItemMatchesAsync(string commandText, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = commandText;
+            using var rdr = await execute.ExecuteReaderAsync(cmd);
+            var SelectListItem = new List<SelectListItemMatch>();
+            if (rdr is not null)
+            {
+                do
+                {
+                    var item = new SelectListItemMatch
+                    (
+                        MatchId: rdr.SafeGetInt("MatchId"),
+                        HomeClubId: rdr.SafeGetInt("HomeClubId"),
+                        AwayClubId: rdr.SafeGetInt("AwayClubId"),
+                        HomeClubCrest: rdr.SafeGetString("HomeClubCrest"),
+                        AwayClubCrest: rdr.SafeGetString("AwayClubCrest"),
+                        HomeTheme: rdr.SafeGetString("HomeClubTheme"),
+                        AwayTheme: rdr.SafeGetString("AwayClubTheme"),
+                        MatchContent: rdr.SafeGetString("MatchContent"),
+                        MatchSubContent: rdr.SafeGetString("MatchSubContent")
+                    );
+                    SelectListItem.Add(item);
+
+                } while (await rdr.ReadAsync(ct));
+            }
+            return SelectListItem;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<List<SelectListItemMatch>> SelectListItemMatchForLineupAsync(CancellationToken ct = default)
     {
         try
         {
             var cmd = new SqlCommand();
             cmd.CommandText = SelectListItemMatchForLineupCommands;
             using var rdr = await execute.ExecuteReaderAsync(cmd);
-            var SelectListItem = new List<SelectListItemMatchForLineup>();
+            var SelectListItem = new List<SelectListItemMatch>();
             if (rdr is not null)
             {
                 do
                 {
-                    var item = new SelectListItemMatchForLineup
+                    var item = new SelectListItemMatch
                     (
                         rdr.GetInt32(rdr.GetOrdinal("MatchId")),
                         rdr.GetInt32(rdr.GetOrdinal("HomeClubId")),
@@ -190,17 +226,17 @@ public class SelectListItems : ISelectListItems
                 {
                     var item = new SelectListItemPlayerLineupByClubId
                     (
-                        rdr.GetInt32(rdr.GetOrdinal("ClubId")),
-                        rdr.IsDBNull(rdr.GetOrdinal("ClubCrest")) ? "" : rdr.GetString(rdr.GetOrdinal("ClubCrest")),
-                        rdr.IsDBNull(rdr.GetOrdinal("ClubTheme")) ? "" : rdr.GetString(rdr.GetOrdinal("ClubTheme")),
-                        rdr.GetInt32(rdr.GetOrdinal("PlayerId")),
-                        rdr.IsDBNull(rdr.GetOrdinal("FirstName")) ? "" : rdr.GetString(rdr.GetOrdinal("FirstName")),
-                        rdr.IsDBNull(rdr.GetOrdinal("LastName")) ? "" : rdr.GetString(rdr.GetOrdinal("LastName")),
-                        rdr.IsDBNull(rdr.GetOrdinal("Photo")) ? "" : rdr.GetString(rdr.GetOrdinal("Photo")),
-                        rdr.GetInt32(rdr.GetOrdinal("PlayerNumber")),
-                        rdr.IsDBNull(rdr.GetOrdinal("PreferredFoot")) ? "" : rdr.GetString(rdr.GetOrdinal("PreferredFoot")),
-                        rdr.GetInt32(rdr.GetOrdinal("PositionId")),
-                        rdr.IsDBNull(rdr.GetOrdinal("Position")) ? "" : rdr.GetString(rdr.GetOrdinal("Position"))
+                        ClubId: rdr.SafeGetInt("ClubId"),
+                        ClubCrest: rdr.SafeGetString("ClubCrest"),
+                        ClubTheme: rdr.SafeGetString("ClubTheme"),
+                        PlayerId: rdr.SafeGetInt("PlayerId"),
+                        FirstName: rdr.SafeGetString("FirstName"),
+                        LastName: rdr.SafeGetString("LastName"),
+                        Photo: rdr.SafeGetString("Photo"),
+                        PlayerNumber: rdr.SafeGetInt("PlayerNumber"),
+                        PreferredFoot: rdr.SafeGetString("PreferredFoot"),
+                        PositionId: rdr.SafeGetInt("PositionId"),
+                        Position: rdr.SafeGetString("Position")
                     );
                     SelectListItem.Add(item);
 
@@ -338,7 +374,7 @@ public class SelectListItems : ISelectListItems
         {
             var cmd = new SqlCommand();
             cmd.CommandText = commandText;
-            foreach(var param in sqlParams)
+            foreach (var param in sqlParams)
             {
                 cmd.Parameters.AddWithValue(param.Key, param.Value);
             }

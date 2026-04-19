@@ -32,6 +32,8 @@ public class NewsRepository : INewsRepository
             cmd.Parameters.AddWithValue("@Title", newsDto.Title);
             cmd.Parameters.AddWithValue("@Subtitle", newsDto.Subtitle);
             cmd.Parameters.AddWithValue("@Content", newsDto.Content);
+            cmd.Parameters.AddWithValue("@ReferenceUrl", newsDto.ReferenceUrl);
+            cmd.Parameters.AddWithValue("@VideoReferenceUrl", newsDto.VideoReferenceUrl);
             cmd.Parameters.AddWithValue("@NewsTagId", newsDto.NewsTagId);
             cmd.Parameters.AddWithValue("@ImageUrl", newsDto.ImageUrl);
             cmd.Parameters.AddWithValue("@PublishedDate", newsDto.PublishedDate);
@@ -40,6 +42,9 @@ public class NewsRepository : INewsRepository
             cmd.Parameters.AddWithValue("@MatchId", newsDto.MatchId);
             cmd.Parameters.AddWithValue("@ClubId", newsDto.ClubId);
             cmd.Parameters.AddWithValue("@IsActive", newsDto.IsActive);
+            cmd.Parameters.AddWithValue("@IsFeatured", newsDto.IsActive);
+            cmd.Parameters.AddWithValue("@IsVideo", newsDto.IsVideo);
+            cmd.Parameters.AddWithValue("@IsQuizzes", newsDto.IsQuizzes);
             return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
         }
         catch (SqlException ex)
@@ -92,6 +97,7 @@ public class NewsRepository : INewsRepository
                         Title = rdr.SafeGetString("Title"),
                         Subtitle = rdr.SafeGetString("Subtitle"),
                         Content = rdr.SafeGetString("Content"),
+                        ReferenceUrl = rdr.SafeGetString("ReferenceUrl"),
                         Author = rdr.SafeGetString("Author"),
                         PublishedDate = rdr.SafeGetString("PublishedDate"),
                         ImageUrl = rdr.SafeGetString("ImageUrl"),
@@ -129,6 +135,7 @@ public class NewsRepository : INewsRepository
                         Title = rdr.SafeGetString("Title"),
                         Subtitle = rdr.SafeGetString("Subtitle"),
                         Content = rdr.SafeGetString("Content"),
+                        ReferenceUrl = rdr.SafeGetString("ReferenceUrl"),
                         AuthorId = rdr.SafeGetString("AuthorId"),
                         PublishedDate = rdr.SafeGetDateTime("PublishedDate"),
                         ImageUrl = rdr.SafeGetString("ImageUrl"),
@@ -165,6 +172,8 @@ public class NewsRepository : INewsRepository
             cmd.Parameters.AddWithValue("@Title", newsDto.Title);
             cmd.Parameters.AddWithValue("@Subtitle", newsDto.Subtitle);
             cmd.Parameters.AddWithValue("@Content", newsDto.Content);
+            cmd.Parameters.AddWithValue("@ReferenceUrl", newsDto.ReferenceUrl);
+            cmd.Parameters.AddWithValue("@VideoReferenceUrl", newsDto.VideoReferenceUrl);
             cmd.Parameters.AddWithValue("@NewsTagId", newsDto.NewsTagId);
             cmd.Parameters.AddWithValue("@ImageUrl", newsDto.ImageUrl);
             cmd.Parameters.AddWithValue("@PublishedDate", newsDto.PublishedDate);
@@ -173,6 +182,9 @@ public class NewsRepository : INewsRepository
             cmd.Parameters.AddWithValue("@MatchId", newsDto.MatchId);
             cmd.Parameters.AddWithValue("@ClubId", newsDto.ClubId);
             cmd.Parameters.AddWithValue("@IsActive", newsDto.IsActive);
+            cmd.Parameters.AddWithValue("@IsFeatured", newsDto.IsActive);
+            cmd.Parameters.AddWithValue("@IsVideo", newsDto.IsVideo);
+            cmd.Parameters.AddWithValue("@IsQuizzes", newsDto.IsQuizzes);
             return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
         }
         catch (SqlException ex)

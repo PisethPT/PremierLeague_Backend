@@ -30,6 +30,8 @@ namespace PremierLeague_Backend.Controllers
             {
                 viewModel.NewsDetailDtos = await repository.GetAllNewsDetailAsync();
                 viewModel.SelectListItemNewsTag = await selectListItems.SelectListItemHasSubtitleAsync(SelectListItemCommands.CommandSelectListItemNewsTag);
+                viewModel.SelectListItemClubs = await selectListItems.SelectListItemClubAsync();
+                viewModel.SelectListItemMatches = await selectListItems.SelectListItemMatchesAsync(SelectListItemCommands.SelectListItemMatchCommands);
                 ViewBag.TotalCount = viewModel.NewsDetailDtos.Count();
                 ViewBag.CurrentPage = 1;
                 ViewBag.TotalPages = (int)Math.Ceiling((double)ViewBag.TotalCount / 10);

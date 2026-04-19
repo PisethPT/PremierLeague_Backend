@@ -245,13 +245,13 @@ public class PlayerRepository : IPlayerRepository
     Position MapPosition(object dbValue)
     {
         if (dbValue == null)
-            return Position.None;
+            return Position.Unknown;
 
         if (dbValue is int intVal)
         {
             return Enum.IsDefined(typeof(Position), intVal)
                 ? (Position)intVal
-                : Position.None;
+                : Position.Unknown;
         }
 
         if (dbValue is string strVal)
@@ -262,7 +262,7 @@ public class PlayerRepository : IPlayerRepository
             {
                 return Enum.IsDefined(typeof(Position), parsedInt)
                     ? (Position)parsedInt
-                    : Position.None;
+                    : Position.Unknown;
             }
 
             if (Enum.TryParse<Position>(strVal, true, out var position))
@@ -271,18 +271,18 @@ public class PlayerRepository : IPlayerRepository
             }
         }
 
-        return Position.None;
+        return Position.Unknown;
     }
     PreferredFoot MapPreferredFoot(object dbValue)
     {
         if (dbValue == null)
-            return PreferredFoot.None;
+            return PreferredFoot.Unknown;
 
         if (dbValue is int intVal)
         {
             return Enum.IsDefined(typeof(PreferredFoot), intVal)
                 ? (PreferredFoot)intVal
-                : PreferredFoot.None;
+                : PreferredFoot.Unknown;
         }
 
         if (dbValue is string strVal)
@@ -293,7 +293,7 @@ public class PlayerRepository : IPlayerRepository
             {
                 return Enum.IsDefined(typeof(PreferredFoot), parsedInt)
                     ? (PreferredFoot)parsedInt
-                    : PreferredFoot.None;
+                    : PreferredFoot.Unknown;
             }
 
             if (Enum.TryParse<PreferredFoot>(strVal, true, out var foot))
@@ -302,6 +302,6 @@ public class PlayerRepository : IPlayerRepository
             }
         }
 
-        return PreferredFoot.None;
+        return PreferredFoot.Unknown;
     }
 }

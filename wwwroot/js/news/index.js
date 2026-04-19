@@ -8,24 +8,35 @@ const NEWS_ENDPOINT = {
 
 (async () => {
   const { CustomSelect } = await import("/js/shared/select_custom.js");
+  const { MatchSelect } = await import("/js/shared/match_select.js");
 
   window.CustomSelect = CustomSelect;
+  window.MatchSelect = MatchSelect;
 
   window.selectNewsTagInst = CustomSelect.init(
     document.getElementById("selectNewsTag"),
     {
       showImage: false,
-      placeholder: "Select News Tag",
+      placeholder: "Select news tag",
     },
   );
 
-  // window.selectMatchInst = CustomSelect.init(
-  //   document.getElementById("selectMatch"),
-  //   {
-  //     showImage: false,
-  //     placeholder: "Select Match",
-  //   },
-  // );
+  window.selectClubInst = CustomSelect.init(
+    document.getElementById("selectClub"),
+    {
+      showImage: false,
+      placeholder: "Select club",
+    },
+  );
+
+  window.selectMatchInst = MatchSelect.init(
+    document.getElementById("selectMatch"),
+    {
+      showImage: true,
+      placeholder: "Select Match",
+      imgSize: "w-auto h-7",
+    },
+  );
 })();
 
 function updateCharCounter(input) {
@@ -52,6 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
     input.addEventListener("input", () => updateCharCounter(input));
   });
 });
+
 $("#removePhoto").on("click", function () {
   resetFile();
 });
@@ -59,6 +71,11 @@ $("#removePhoto").on("click", function () {
 const resetForm = () => {
   let form = $("#newsForm");
   form[0].reset();
+
+  if (window.selectMatchInst) {
+    window.selectMatchInst.reset();
+  }
+
   resetFile();
 
   form.find("input").not("[name='__RequestVerificationToken']").val("");
@@ -93,6 +110,19 @@ $("#btnAddNews").on("click", function () {
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + 7);
   $("#expiryDate").val(expiry.toISOString().split("T")[0]);
+
+  $("#isFeatured").prop("checked", false);
+  $("#isFeaturedHidden").val("false");
+
+  $("#isActive").prop("checked", true);
+  $("#isActiveHidden").val("true");
+
+  $("#isVideo").prop("checked", false);
+  $("#isVideoHidden").val("false");
+
+  $("#isQuizzes").prop("checked", false);
+  $("#isQuizzesHidden").val("false");
+
   openModal("modal-8xl", true);
 });
 
@@ -159,3 +189,19 @@ function toggleEditNews(newsId) {
     alert(JSON.stringify(error));
   }
 }
+
+$("#isFeatured").on("change", function () {
+  $("#isFeaturedHidden").val(this.checked ? "true" : "false");
+});
+
+$("#isActive").on("change", function () {
+  $("#isActiveHidden").val(this.checked ? "true" : "false");
+});
+
+$("#isVideo").on("change", function () {
+  $("#isVideoHidden").val(this.checked ? "true" : "false");
+});
+
+$("#isQuizzes").on("change", function () {
+  $("#isQuizzesHidden").val(this.checked ? "true" : "false");
+});

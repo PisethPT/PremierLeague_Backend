@@ -63,7 +63,7 @@ namespace PremierLeague_Backend.Controllers
                 if (!await repository.FindVideoExisting(videoDto))
                 {
                     ModelState.AddModelError(nameof(videoDto.Title), "A video with this title already exists.");
-                    return View(viewModel);
+                    return RedirectToAction(nameof(Index));
                 }
 
                 var success = await repository.AddVideoAsync(videoDto);
@@ -71,17 +71,17 @@ namespace PremierLeague_Backend.Controllers
                 {
                     ModelState.AddModelError(string.Empty, "Unable to create video. Please try again or contact admin.");
                     _logger.LogWarning("AddVideoAsync returned {success} for video {VideoTitle}", success, videoDto.Title);
-                    return View(viewModel);
+                    return RedirectToAction(nameof(Index));
                 }
 
                 TempData["SuccessMessage"] = "Video created successfully.";
-                return RedirectToAction(nameof(IndexAsync));
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating video");
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(viewModel);
+                return View(nameof(Index), viewModel);
             }
         }
 
@@ -108,7 +108,7 @@ namespace PremierLeague_Backend.Controllers
                 if (!await repository.FindVideoExisting(videoDto))
                 {
                     ModelState.AddModelError(nameof(videoDto.Title), "A video with this title already exists.");
-                    return View(viewModel);
+                    return RedirectToAction(nameof(Index));
                 }
 
                 var success = await repository.UpdateVideoAsync(videoId, videoDto);
@@ -116,7 +116,7 @@ namespace PremierLeague_Backend.Controllers
                 {
                     ModelState.AddModelError(string.Empty, "Unable to update video. Please try again or contact admin.");
                     _logger.LogWarning("UpdateVideoAsync returned {success} for video {VideoTitle}", success, videoDto.Title);
-                    return View(viewModel);
+                    return RedirectToAction(nameof(Index));
                 }
 
                 TempData["SuccessMessage"] = "Video updated successfully.";
@@ -126,7 +126,7 @@ namespace PremierLeague_Backend.Controllers
             {
                 _logger.LogError(ex, "Error updating video");
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(viewModel);
+                return View(nameof(Index), viewModel);
             }
         }
 
@@ -140,13 +140,13 @@ namespace PremierLeague_Backend.Controllers
                 if (videoId <= 0 || await repository.GetVideoByIdAsync(videoId) == null)
                 {
                     ModelState.AddModelError(string.Empty, "Video not found.");
-                    return View(viewModel);
+                    return RedirectToAction(nameof(Index));
                 }
 
                 if (await repository.GetVideoByIdAsync(videoId) is null)
                 {
                     ModelState.AddModelError(string.Empty, $"Video by id {videoId} not found.");
-                    return View(viewModel);
+                    return RedirectToAction(nameof(Index));
                 }
 
                 var success = await repository.DeleteVideoAsync(videoId);
@@ -154,7 +154,7 @@ namespace PremierLeague_Backend.Controllers
                 {
                     ModelState.AddModelError(string.Empty, "Unable to delete video. Please try again or contact admin.");
                     _logger.LogWarning("DeleteVideoAsync returned {success} for video {VideoId}", success, videoId);
-                    return View(viewModel);
+                    return RedirectToAction(nameof(Index));
                 }
 
                 TempData["SuccessMessage"] = "Video deleted successfully.";
@@ -164,7 +164,7 @@ namespace PremierLeague_Backend.Controllers
             {
                 _logger.LogError(ex, "Error deleting video");
                 ModelState.AddModelError(string.Empty, ex.Message);
-                return View(viewModel);
+                return View(nameof(Index), viewModel);
             }
         }
 

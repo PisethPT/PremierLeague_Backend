@@ -1,4 +1,5 @@
 using System.Data.SqlClient;
+using System.Text.Json;
 using PremierLeague_Backend.Data.Repositories.Interfaces;
 using PremierLeague_Backend.Helper;
 using PremierLeague_Backend.Models.DTOs;
@@ -15,9 +16,38 @@ public class LineupRepository : ILineupRepository
     {
         this.execute = execute;
     }
-    public Task<bool> CreateLineupAsync(LineupDto lineupDto)
+    public async Task<bool> AddLineupAsync(LineupDto lineupDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = AddMatchLineupCommand;
+            cmd.Parameters.AddWithValue("@MatchId", lineupDto.MatchId);
+            cmd.Parameters.AddWithValue("@HomeClubFormationId", lineupDto.HomeClubFormationId);
+            cmd.Parameters.AddWithValue("@AwayClubFormationId", lineupDto.AwayClubFormationId);
+            cmd.Parameters.AddWithValue("@HomeClubLineupJson", JsonSerializer.Serialize(lineupDto.HomeClubLineup));
+            cmd.Parameters.AddWithValue("@AwayClubLineupJson", JsonSerializer.Serialize(lineupDto.AwayClubLineup));
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<bool> DeleteLineupAsync(int matchId)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = DeleteMatchLineupCommand;
+            cmd.Parameters.AddWithValue("@MatchId", matchId);
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
     }
 
     public async Task<IEnumerable<LineupDetailDto>> GetAllLineupsAsync(int? page = 1, int? pageSize = 20, CancellationToken ct = default)
@@ -157,6 +187,36 @@ public class LineupRepository : ILineupRepository
         }
     }
 
+    public async Task<IEnumerable<LineupFormationLayout>> GetLineupFormationLayoutByFormationIdAsync(int formationId = 1, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = GetLineupFormationLayoutByFormationIdCommand;
+            cmd.Parameters.AddWithValue("@FormationId", formationId);
+            var rdr = await execute.ExecuteReaderAsync(cmd);
+            var lineupFormationLayout = new List<LineupFormationLayout>();
+            if (rdr is not null)
+            {
+                do
+                {
+                    lineupFormationLayout.Add(new LineupFormationLayout
+                    {
+                        Row = rdr.SafeGetInt("Row"),
+                        PositionId = rdr.SafeGetInt("PositionId"),
+                        Code = rdr.SafeGetString("Code"),
+                        FormationName = rdr.SafeGetString("FormationName")
+                    });
+                } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
+            }
+            return lineupFormationLayout;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception($"Database fetching lineup formation layout failed: {ex.Message}", ex);
+        }
+    }
+
     public async Task<IEnumerable<LineupFormationDetailDto>> GetSubstitutionFormationByMatchIdAsync(int matchId, CancellationToken ct = default)
     {
         try
@@ -175,6 +235,7 @@ public class LineupRepository : ILineupRepository
                         MatchId = rdr.SafeGetInt("MatchId"),
                         ClubId = rdr.SafeGetInt("ClubId"),
                         IsHomeClub = rdr.SafeGetBoolean("IsHomeClub"),
+
                         PlayerId = rdr.SafeGetInt("PlayerId"),
                         PlayerShortName = rdr.SafeGetString("PlayerShortName"),
                         PlayerNumber = rdr.SafeGetString("PlayerNumber"),
@@ -191,6 +252,97 @@ public class LineupRepository : ILineupRepository
         catch (SqlException ex)
         {
             throw new Exception($"Database fetching substitution formation failed: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<bool> UpdateLineupAsync(int matchId, LineupDto lineupDto)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = UpdateMatchLineupCommand;
+            cmd.Parameters.AddWithValue("@MatchId", matchId);
+            cmd.Parameters.AddWithValue("@HomeClubFormationId", lineupDto.HomeClubFormationId);
+            cmd.Parameters.AddWithValue("@AwayClubFormationId", lineupDto.AwayClubFormationId);
+            cmd.Parameters.AddWithValue("@HomeClubLineupJson", JsonSerializer.Serialize(lineupDto.HomeClubLineup));
+            cmd.Parameters.AddWithValue("@AwayClubLineupJson", JsonSerializer.Serialize(lineupDto.AwayClubLineup));
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<bool> IsExistLineupAsync(int matchId)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = IsExistLineupCommand;
+            cmd.Parameters.AddWithValue("@MatchId", matchId);
+            return await execute.ExecuteScalarAsync<bool>(cmd);
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception("Database IsExistLineup error: " + ex.Message);
+        }
+    }
+
+    public async Task<LineupDto> GetLineupByMatchIdAsync(int matchId, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = GetLineupByMatchIdCommand;
+            cmd.Parameters.AddWithValue("@MatchId", matchId);
+            var rdr = await execute.ExecuteReaderAsync(cmd);
+            if (rdr is not null)
+            {
+                return new LineupDto
+                {
+                    MatchId = rdr.GetInt32(rdr.GetOrdinal("MatchId")),
+                    HomeClubFormationId = rdr.GetInt32(rdr.GetOrdinal("HomeClubFormationId")),
+                    AwayClubFormationId = rdr.GetInt32(rdr.GetOrdinal("AwayClubFormationId")),
+                    HomeClubLineup = JsonSerializer.Deserialize<List<LineupClubDto>>(rdr.GetString(rdr.GetOrdinal("HomeClubLineup")))!,
+                    AwayClubLineup = JsonSerializer.Deserialize<List<LineupClubDto>>(rdr.GetString(rdr.GetOrdinal("AwayClubLineup")))!
+                };
+            }
+            return new LineupDto();
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception("Database GetLineupByMatchId error: " + ex.Message);
+        }
+    }
+
+    public async Task<bool> IsMatchCurringKickOffAsync(int matchId)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = IsMatchCurringKickOffCommand;
+            cmd.Parameters.AddWithValue("@MatchId", matchId);
+            return await execute.ExecuteScalarAsync<bool>(cmd);
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception("Database IsMatchCurringKickOff error: " + ex.Message);
+        }
+    }
+
+    public async Task<bool> IsMatchEndedAsync(int matchId)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = IsMatchEndedCommand;
+            cmd.Parameters.AddWithValue("@MatchId", matchId);
+            return await execute.ExecuteScalarAsync<bool>(cmd);
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception("Database IsMatchEnded error: " + ex.Message);
         }
     }
 }

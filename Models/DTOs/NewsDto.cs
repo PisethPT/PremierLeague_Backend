@@ -18,6 +18,8 @@ public class NewsDto
     [MaxLength(4000, ErrorMessage = "Content cannot exceed 4000 characters")]
     [RegularExpression(@"^\S+(\s+\S+)*$", ErrorMessage = "Content cannot be empty or only whitespace.")]
     public string Content { get; set; }
+    public string? ReferenceUrl { get; set; }
+    public string? VideoReferenceUrl { get; set; }
     public string? AuthorId { get; set; }
     [Required(ErrorMessage = "Published Date is required")]
     [DataType(DataType.Date)]
@@ -27,7 +29,9 @@ public class NewsDto
     [DataType(DataType.Date)]
     public DateTime ExpiryDate { get; set; } = DateTime.Now.AddDays(7);
     public bool IsActive { get; set; } = true;
-
+    public bool IsFeatured { get; set; } = false;
+    public bool IsVideo { get; set; } = false;
+    public bool IsQuizzes { get; set; } = false;
     public int? MatchId { get; set; }
     public int? ClubId { get; set; }
 

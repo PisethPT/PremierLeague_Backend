@@ -2,6 +2,7 @@ const LINEUP_BASE_CONTROLLER = "/en/lineups";
 const LINEUP_ENDPOINT = {
   CREATE_LINEUP_ENDPOINT: LINEUP_BASE_CONTROLLER + "/create",
   UPDATE_LINEUP_ENDPOINT: LINEUP_BASE_CONTROLLER + "/update",
+  DELETE_LINEUP_ENDPOINT: LINEUP_BASE_CONTROLLER + "/delete",
   FIND_LINEUP_BY_ID_ENDPOINT: LINEUP_BASE_CONTROLLER + "/get-lineup",
   FIND_FORMATION_ENDPOINT: LINEUP_BASE_CONTROLLER + "/get-formations",
   GET_PLAYERS_BY_MATCH_ID_ENDPOINT:
@@ -10,6 +11,10 @@ const LINEUP_ENDPOINT = {
     LINEUP_BASE_CONTROLLER + "/get-lineup-club-info-by-match",
   GET_LINEUP_FORMATION_DETAIL_BY_MATCH_ID_ENDPOINT:
     LINEUP_BASE_CONTROLLER + "/get-lineup-formation-detail-by-match",
+  GET_LINEUP_FORMATION_LAYOUT_BY_FORMATION_ID_ENDPOINT:
+    LINEUP_BASE_CONTROLLER + "/get-lineup-formation-layout-by-formation-id",
+  GET_LINEUP_BY_MATCH_ID_ENDPOINT:
+    LINEUP_BASE_CONTROLLER + "/get-lineup-by-match",
 };
 
 const BASE_CLUB_PATH = "/upload/clubs/";
@@ -33,7 +38,162 @@ tabBtns.forEach((btn) => {
   });
 });
 
-$("#btnAddNewLineup").on("click", function () {});
+const resetForm = () => {
+  let form = $("#lineupForm");
+  form[0].reset();
+
+  if (window.matchSelectInst) {
+    window.matchSelectInst.reset();
+  }
+  
+  $("#homeClubFormation").val("1");
+  $("#awayClubFormation").val("1");
+
+  if (window.homeClubFormationInst) window.homeClubFormationInst.setValue("1");
+  if (window.awayClubFormationInst) window.awayClubFormationInst.setValue("1");
+
+  playerStore.home = {};
+  playerStore.away = {};
+  state.home.slotPlayers = [];
+  state.away.slotPlayers = [];
+  state.home.draggedPlayer = null;
+  state.away.draggedPlayer = null;
+
+  const noPlayersHtml = '<p class="text-gray-400 text-sm">No players found</p>';
+  $("#homeClubPlayerId").empty().html(noPlayersHtml);
+  $("#awayClubPlayerId").empty().html(noPlayersHtml);
+
+  renderFormation("home", 1);
+  renderFormation("away", 1);
+  renderSubSlots("home");
+  renderSubSlots("away");
+
+  activateTab("tab-match");
+};
+
+(function () {
+  $("#resetBtn").on("click", resetForm);
+})();
+
+$("#btnAddLineup").on("click", async function () {
+  const form = $("#lineupForm");
+  resetForm();
+  form.attr("action", LINEUP_ENDPOINT.CREATE_LINEUP_ENDPOINT);
+  openModal("modal-8xl", true);
+});
+
+$("#lineupForm").on("submit", function (e) {
+  e.preventDefault();
+
+  const dto = {
+    MatchId: Number($("#matchSelectId").val()),
+    HomeClubFormationId: Number($("#homeClubFormation").val()),
+    AwayClubFormationId: Number($("#awayClubFormation").val()),
+    HomeClubLineup: [],
+    AwayClubLineup: [],
+  };
+
+  buildLineup("home", dto.HomeClubLineup);
+  buildLineup("away", dto.AwayClubLineup);
+
+  if (dto.HomeClubLineup.filter((x) => x.IsStarting).length !== 11) {
+    alert("Home club must have 11 starting players.");
+    activateTab("tab-home-club");
+    return;
+  } else if (dto.AwayClubLineup.filter((x) => x.IsStarting).length !== 11) {
+    alert("Away club must have 11 starting players.");
+    activateTab("tab-away-club");
+    return;
+  }
+
+  submitDto(dto);
+});
+
+function submitDto(dto) {
+  $.ajax({
+    url: $("#lineupForm").attr("action"),
+    type: "POST",
+    contentType: "application/json",
+    data: JSON.stringify(dto),
+    headers: {
+      RequestVerificationToken: $(
+        'input[name="__RequestVerificationToken"]',
+      ).val(),
+    },
+    success: function (response) {
+      window.location.href = response.redirectUrl;
+    },
+    error: function (err) {
+      if (err.responseJSON && err.responseJSON.redirectUrl) {
+        window.location.href = err.responseJSON.redirectUrl;
+      } else {
+        alert("A critical error occurred.");
+      }
+    },
+  });
+}
+
+function buildLineup(side, dtoArray) {
+  const ctx = state[side];
+
+  const pitchSlots = document.querySelectorAll(
+    `#${ctx.formationContainer} [data-player-slot]`,
+  );
+
+  pitchSlots.forEach((el) => {
+    const playerId = Number(el.dataset.playerSlot);
+    if (!playerId) return;
+
+    const player = playerStore[side][playerId];
+    if (!player) {
+      console.warn("Player not found in store:", playerId);
+      return;
+    }
+
+    const wrapper = el.closest("[data-formation-slot]");
+    const positionId = Number(wrapper?.dataset.formationSlot);
+
+    if (!positionId) {
+      console.warn("Missing formation positionId for player:", playerId);
+      return;
+    }
+
+    dtoArray.push({
+      ClubId: player.clubId,
+      PlayerId: playerId,
+      FormationPositionId: positionId,
+      IsStarting: true,
+      FormationSlot: positionId,
+    });
+  });
+
+  const subSlots = document.querySelectorAll(
+    `#${ctx.substitutionContainer} [data-is-sub-slot="true"]`,
+  );
+
+  subSlots.forEach((slot) => {
+    const card = slot.querySelector("[data-player-id]");
+    if (!card) return;
+
+    const playerId = Number(card.dataset.playerId);
+    const clubId = Number(card.dataset.clubId);
+    const slotNumber = Number(slot.dataset.subSlot);
+
+    const player = playerStore[side][playerId];
+    if (!player) {
+      console.warn("Sub player not found in store:", playerId);
+      return;
+    }
+
+    dtoArray.push({
+      ClubId: clubId,
+      PlayerId: playerId,
+      FormationPositionId: player.positionId,
+      IsStarting: false,
+      FormationSlot: slotNumber,
+    });
+  });
+}
 
 (async () => {
   const { MatchSelect } = await import("/js/shared/match_select.js");
@@ -67,51 +227,6 @@ $("#btnAddNewLineup").on("click", function () {});
     },
   );
 })();
-
-$("#matchSelectId").on("change", function () {
-  const matchId = $(this).val();
-  if (!matchId) return;
-
-  $.ajax({
-    url: LINEUP_ENDPOINT.GET_PLAYERS_BY_MATCH_ID_ENDPOINT + `/${matchId}`,
-    headers: {
-      RequestVerificationToken: $(
-        'input[name="__RequestVerificationToken"]',
-      ).val(),
-    },
-    method: "GET",
-    success: function (response) {
-      if (response.statusCode !== 200) return;
-
-      renderPlayers({
-        containerId: "#homeClubPlayerId",
-        players: response.data.homePlayers,
-        side: "home",
-      });
-
-      renderPlayers({
-        containerId: "#awayClubPlayerId",
-        players: response.data.awayPlayers,
-        side: "away",
-      });
-
-      renderFormation("home", 1);
-      renderFormation("away", 1);
-
-      slotHomePlayers = getPlayerIds("homeClubPlayerId");
-      slotAwayPlayers = getPlayerIds("awayClubPlayerId");
-
-      state.home.slotPlayers = [...slotHomePlayers];
-      state.away.slotPlayers = [...slotAwayPlayers];
-
-      renderBench("home");
-      renderBench("away");
-    },
-    error: function (err) {
-      console.error("Error fetching players:", err);
-    },
-  });
-});
 
 async function viewLineupFormation(matchId) {
   try {
@@ -184,8 +299,8 @@ async function viewLineupFormation(matchId) {
   }
 }
 
-function getLineupFormationDetail(matchId) {
-  return $.ajax({
+async function getLineupFormationDetail(matchId) {
+  return await $.ajax({
     url:
       LINEUP_ENDPOINT.GET_LINEUP_FORMATION_DETAIL_BY_MATCH_ID_ENDPOINT +
       `/${matchId}`,
@@ -196,60 +311,6 @@ function getLineupFormationDetail(matchId) {
       ).val(),
     },
   });
-}
-
-function renderPlayers({ containerId, players, side }) {
-  const $container = $(containerId);
-  $container.empty();
-
-  playerStore[side] = {};
-
-  if (!players || players.length === 0) {
-    $container.html(`<p class="text-gray-400 text-sm">No players found</p>`);
-    return;
-  }
-
-  let html = "";
-
-  players.forEach((player) => {
-    const normalizedPlayer = {
-      id: player.playerId,
-      firstName: player.firstName,
-      lastName: player.lastName,
-      position: player.position,
-      positionId: Number(player.positionId),
-      playerNumber: player.playerNumber,
-      img: `/upload/players/${player.photo}`,
-      clubTheme: player.clubTheme,
-    };
-
-    playerStore[side][normalizedPlayer.id] = normalizedPlayer;
-
-    html += `
-      <div
-        data-player-id="${normalizedPlayer.id}"
-        class="flex items-center gap-3 bg-[#1e0021] p-2 rounded-2xl cursor-grab hover:ring-2 hover:ring-[#8a3fbf]"
-      >
-        <div class="w-14 h-14 rounded-2xl overflow-hidden flex justify-center items-center"
-             style="background-color:${normalizedPlayer.clubTheme}">
-          <img src="${normalizedPlayer.img}"
-               class="h-[4rem] mt-5 object-contain"
-               draggable="true"
-               ondragstart="onPlayerDrag(event, '${side}')" />
-        </div>
-
-        <div>
-          <p class="text-sm text-white font-medium">${normalizedPlayer.firstName}</p>
-          <p class="text-xs text-white font-medium">${normalizedPlayer.lastName}</p>
-          <p class="text-xs text-gray-300 mt-2">
-            ${normalizedPlayer.position} • #${normalizedPlayer.playerNumber}
-          </p>
-        </div>
-      </div>
-    `;
-  });
-
-  $container.html(html);
 }
 
 function renderTeam(teamId, formationString, allPlayers) {
@@ -301,10 +362,10 @@ function createRow(container, rowPlayers, layout, rowIndex) {
 
                 ${player.subOutMinute ? `<span class="absolute -top-4 -left-2 text-[10px] font-black text-white italic drop-shadow-md">${player.subOutMinute}' <span class="text-red-500">↓</span></span>` : ""}
 
-                <div class="w-12 h-12 md:w-14 md:h-14 rounded-lg shadow-2xl flex items-end justify-center overflow-hidden" 
+                <div class="w-14 h-14 rounded-2xl shadow-2xl flex justify-center overflow-hidden" 
                      style="background: #37003c">
                     <img src="${BASE_PLAYER_PATH + player.playerPhoto}" 
-                         class="w-[90%] h-[90%] object-contain drop-shadow-lg" 
+                         class="h-[4rem] mt-1 object-contain drop-shadow-lg" 
                          onerror="this.src='/upload/players/placeholder.png'">
                 </div>
 
@@ -342,10 +403,10 @@ function renderSubstitutes(containerId, players) {
     container.innerHTML += `
             <div class="flex items-center justify-between w-full hover:bg-white/5 rounded-lg transition-colors group">
                 <div class="flex items-center gap-3">
-                    <div class="relative w-14 h-14 rounded-lg overflow-hidden"
+                    <div class="relative w-14 h-14 rounded-2xl overflow-hidden"
                          style="background: ${player.clubTheme}">
                         <img src="${photoPath}" 
-                             class="w-full h-full object-contain pt-1"
+                             class="h-auto mt-1 object-contain"
                              onerror="this.src='/upload/players/placeholder.png'">
                     </div>
 
@@ -378,4 +439,12 @@ function renderSubstitutes(containerId, players) {
             </div>
         `;
   });
+}
+
+function activateTab(tabId) {
+  const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
+
+  if (tabBtn) {
+    tabBtn.click();
+  }
 }

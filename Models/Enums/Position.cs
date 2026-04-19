@@ -2,9 +2,9 @@ namespace PremierLeague_Backend.Models.Enums;
 
 public enum Position
 {
-    Goalkeeper,
+    Unknown,
     Defender,
     Midfielder,
     Forward,
-    None
+    Goalkeeper
 }

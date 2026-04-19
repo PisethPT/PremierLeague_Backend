@@ -1,19 +1,35 @@
+using System.Text.RegularExpressions;
 namespace PremierLeague_Backend.Helper;
+
 public static class VideoHelper
 {
-    public static string GetYouTubeId(string url)
+    public static string GetYouTubeId(string input)
     {
-        if (string.IsNullOrEmpty(url)) return "";
-        // Handles https://www.youtube.com/watch?v=XVp-ZjKB2mk
-        var uri = new Uri(url);
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        return query["v"] ?? url.Split('/').Last();
+        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+
+        var thumbRegex = @"\/vi\/([^\/]{11})";
+        var thumbMatch = Regex.Match(input, thumbRegex);
+        if (thumbMatch.Success) return thumbMatch.Groups[1].Value;
+
+
+        var videoRegex = @"(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^""&?\/\s]{11})";
+        var videoMatch = Regex.Match(input, videoRegex);
+        if (videoMatch.Success) return videoMatch.Groups[1].Value;
+
+        if (input.Length == 11 && !input.Contains("/")) return input;
+
+        return string.Empty;
     }
 
-    public static string GetThumbnailUrl(string url)
+    public static string GetThumbnailUrl(string input)
     {
-        string id = GetYouTubeId(url);
-        // Returns the high-definition thumbnail
-        return $"https://img.youtube.com/vi/{id}/maxresdefault.jpg";
+        string id = GetYouTubeId(input);
+
+        if (string.IsNullOrEmpty(id))
+        {
+            return "/images/placeholder.jpg";
+        }
+
+        return $"https://i.ytimg.com/vi/{id}/mqdefault.jpg";
     }
 }

@@ -43,7 +43,7 @@ namespace PremierLeague_Backend.Controllers
                     //(week, seasonId) = await repository.GetCurrentMatchWeekAndSeasonIdAsync();
                     week = matchSeasonDto.MatchWeek;
                 }
-                week = week > 28 ? 28 : week;
+                week = week > 29 ? 29 : week;
 
                 viewModel.SelectedClubIds = club;
                 var clubIdJson = System.Text.Json.JsonSerializer.Serialize(club);

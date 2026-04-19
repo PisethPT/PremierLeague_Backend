@@ -5,5 +5,5 @@ public enum PreferredFoot
     Right,
     Left,
     Both,
-    None
+    Unknown
 }

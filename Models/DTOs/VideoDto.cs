@@ -8,9 +8,8 @@ public class VideoDto
     [Required(ErrorMessage = "Title is required")]
     [MaxLength(255, ErrorMessage = "Title cannot exceed 255 characters")]
     public string Title { get; set; }
-    [Required(ErrorMessage = "Description is required")]
     [MaxLength(4000, ErrorMessage = "Description cannot exceed 4000 characters")]
-    public string Description { get; set; }
+    public string? Description { get; set; }
     [MaxLength(100, ErrorMessage = "Channel cannot exceed 100 characters")]
     public string? Channel { get; set; }
     [MaxLength(500, ErrorMessage = "Thumbnail URL cannot exceed 500 characters")]

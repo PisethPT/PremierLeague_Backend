@@ -13,8 +13,9 @@ public interface ISelectListItems
     Task<List<SelectListItemReferee>> SelectListItemRefereeAsync(CancellationToken ct = default);
     Task<List<SelectListItemRefereeRole>> SelectListItemRefereeRoleAsync(CancellationToken ct = default);
     Task<List<SelectListItemRefereeBadgeLevel>> SelectListItemRefereeBadgeLevelAsync(CancellationToken ct = default);
-    Task<List<SelectListItemMatchForLineup>> SelectListItemMatchForLineupAsync(CancellationToken ct = default);
+    Task<List<SelectListItemMatch>> SelectListItemMatchForLineupAsync(CancellationToken ct = default);
     Task<List<SelectListItemFormation>> SelectListItemFormationAsync(CancellationToken ct = default);
     Task<List<SelectListItemHasSubtitle>> SelectListItemHasSubtitleAsync(string commandText, CancellationToken ct = default);
     Task<List<SelectListItemHasImage>> SelectListItemHasImageAsync(string commandText, CancellationToken ct = default);
+    Task<List<SelectListItemMatch>> SelectListItemMatchesAsync(string commandText, CancellationToken ct = default);
 }
