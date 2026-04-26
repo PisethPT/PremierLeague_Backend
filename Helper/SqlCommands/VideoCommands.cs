@@ -9,4 +9,5 @@ public static class VideoCommands
     public static string GetAllVideosCommand => "PL_GetAllVideos";
     public static string FindVideoExistingCommand => "PL_FindVideoExisting";
     public static string CountVideosCommand => "PL_CountVideos";
+    public static string GetAllPlayersCommand => "PL_GetAllPlayers";
 }

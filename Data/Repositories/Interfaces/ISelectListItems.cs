@@ -1,5 +1,6 @@
 using PremierLeague_Backend.Models.SelectListItems;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Data.SqlClient;
 
 namespace PremierLeague_Backend.Data.Repositories.Interfaces;
 
@@ -18,4 +19,7 @@ public interface ISelectListItems
     Task<List<SelectListItemHasSubtitle>> SelectListItemHasSubtitleAsync(string commandText, CancellationToken ct = default);
     Task<List<SelectListItemHasImage>> SelectListItemHasImageAsync(string commandText, CancellationToken ct = default);
     Task<List<SelectListItemMatch>> SelectListItemMatchesAsync(string commandText, CancellationToken ct = default);
+    Task<IEnumerable<T>> SelectListItemAsync<T>(string commandText, Func<SqlDataReader, T> mapFunc, CancellationToken ct = default);
+    Task<IEnumerable<T>> SelectListItemAsync<T>(string commandText, Dictionary<string, string>? sqlParams, Func<SqlDataReader, T> mapFunc, CancellationToken ct = default);
+
 }

@@ -16,19 +16,27 @@ public class VideoDto
     public string? ThumbnailUrl { get; set; }
     [MaxLength(500, ErrorMessage = "Video URL cannot exceed 500 characters")]
     public string? VideoUrl { get; set; }
+    public string? ReferenceUrl { get; set; }
     [Required(ErrorMessage = "Video Category ID is required")]
     public int VideoCategoryId { get; set; }
-    [Required(ErrorMessage = "Duration is required")]
-    public string? Publisher { get; set; }
-    public decimal DurationSeconds { get; set; }
+    public int? VideoTagId { get; set; }
     [Required(ErrorMessage = "Published Date is required")]
+    public string? Publisher { get; set; }
+    [Required(ErrorMessage = "Duration is required")]
+    public decimal DurationSeconds { get; set; }
     public DateTime PublishedDate { get; set; }
     [Required(ErrorMessage = "Expiry Date is required")]
     public DateTime ExpiryDate { get; set; }
+    public bool IsStory { get; set; } = false;
+    public bool IsReference { get; set; } = false;
     public bool IsFeatured { get; set; } = false;
     public bool IsActive { get; set; } = true;
+    public bool IsTheArchive { get; set; } = false;
     public int? MatchId { get; set; }
     public int? ClubId { get; set; }
     public int? PlayerId { get; set; }
     public int? SeasonId { get; set; }
+
+    public List<int> ClubIds { get; set; } = new();
+    public List<int> PlayerIds { get; set; } = new();
 }

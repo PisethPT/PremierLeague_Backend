@@ -37,6 +37,13 @@ const NEWS_ENDPOINT = {
       imgSize: "w-auto h-7",
     },
   );
+  window.selectNewsCategoryInst = CustomSelect.init(
+    document.getElementById("selectNewsCategory"),
+    {
+      showImage: true,
+      placeholder: "Select News Category",
+    },
+  );
 })();
 
 function updateCharCounter(input) {
@@ -123,6 +130,12 @@ $("#btnAddNews").on("click", function () {
   $("#isQuizzes").prop("checked", false);
   $("#isQuizzesHidden").val("false");
 
+  $("#isRelatedContent").prop("checked", false);
+  $("#isRelatedContentHidden").val("false");
+
+  $("#isPremierLeagueGame").prop("checked", false);
+  $("#isPremierLeagueGameHidden").val("false");
+
   openModal("modal-8xl", true);
 });
 
@@ -204,4 +217,12 @@ $("#isVideo").on("change", function () {
 
 $("#isQuizzes").on("change", function () {
   $("#isQuizzesHidden").val(this.checked ? "true" : "false");
+});
+
+$("#isRelatedContent").on("change", function () {
+  $("#isRelatedContentHidden").val(this.checked ? "true" : "false");
+});
+
+$("#isPremierLeagueGame").on("change", function () {
+  $("#isPremierLeagueGameHidden").val(this.checked ? "true" : "false");
 });

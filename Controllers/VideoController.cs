@@ -1,8 +1,9 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using PremierLeague_Backend.Data.Repositories.Interfaces;
+using PremierLeague_Backend.Helper;
 using PremierLeague_Backend.Helper.SqlCommands;
 using PremierLeague_Backend.Models.DTOs;
+using PremierLeague_Backend.Models.SelectListItems;
 using PremierLeague_Backend.Models.ViewModels;
 
 namespace PremierLeague_Backend.Controllers
@@ -29,7 +30,9 @@ namespace PremierLeague_Backend.Controllers
             try
             {
                 viewModel.VideoDetailDtos = await repository.GetAllVideosAsync();
-                viewModel.SelectListItemVideoCategory = await selectListItems.SelectListItemHasSubtitleAsync(SelectListItemCommands.CommandSelectListItemVideosCategories);
+                viewModel.SelectListItemClubs = await selectListItems.SelectListItemClubAsync();
+                viewModel.SelectListItemPlayers = await repository.GetAllPlayersAsync();
+                viewModel.selectListItemVideoTag = await selectListItems.SelectListItemsAsync("PL_CommandSelectListItemVideoTag");
                 return View(viewModel);
             }
             catch (Exception ex)
@@ -192,6 +195,44 @@ namespace PremierLeague_Backend.Controllers
                     {
                         VideoItem = video
                     }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting video by id");
+                return Json(new
+                {
+                    StatusCode = 500,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        // GET: VideoController/GetVideoById
+        [HttpGet("get-video-category/{isTheArchive:bool}")]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> GetVideoCategoriesAsync([FromRoute] bool isTheArchive)
+        {
+            try
+            {
+                var data = await selectListItems.SelectListItemAsync<SelectListItemHasSubtitle>
+                (
+                    SelectListItemCommands.CommandSelectListItemVideosCategories,
+                    new Dictionary<string, string>
+                {
+                    {"@IsTheArchive", isTheArchive.ToString().ToLower() }
+                },
+                rdr => new SelectListItemHasSubtitle
+                {
+                    Value = rdr.SafeGetInt("Value"),
+                    Label = rdr.SafeGetString("Label"),
+                    Subtitle = rdr.SafeGetString("Subtitle")
+                });
+                return Json(new
+                {
+                    StatusCode = 200,
+                    Message = "Commit Transaction Success.",
+                    Data = data
                 });
             }
             catch (Exception ex)

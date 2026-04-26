@@ -27,11 +27,15 @@ public class VideoRepository : IVideoRepository
             cmd.Parameters.AddWithValue("@Channel", videoDto.Channel);
             cmd.Parameters.AddWithValue("@ThumbnailUrl", videoDto.ThumbnailUrl);
             cmd.Parameters.AddWithValue("@VideoUrl", videoDto.VideoUrl);
+            cmd.Parameters.AddWithValue("@ReferenceUrl", videoDto.ReferenceUrl);
             cmd.Parameters.AddWithValue("@VideoCategoryId", videoDto.VideoCategoryId);
+            cmd.Parameters.AddWithValue("@VideoTagId", videoDto.VideoTagId);
             cmd.Parameters.AddWithValue("@DurationSeconds", videoDto.DurationSeconds);
             cmd.Parameters.AddWithValue("@Publisher", videoDto.Publisher);
             cmd.Parameters.AddWithValue("@PublishedDate", videoDto.PublishedDate);
             cmd.Parameters.AddWithValue("@ExpiryDate", videoDto.ExpiryDate);
+            cmd.Parameters.AddWithValue("@IsStory", videoDto.IsStory);
+            cmd.Parameters.AddWithValue("@IsReference", videoDto.IsReference);
             cmd.Parameters.AddWithValue("@IsFeatured", videoDto.IsFeatured);
             cmd.Parameters.AddWithValue("@IsActive", videoDto.IsActive);
             cmd.Parameters.AddWithValue("@MatchId", videoDto.MatchId);
@@ -76,6 +80,41 @@ public class VideoRepository : IVideoRepository
         catch (Exception ex)
         {
             throw new Exception($"Database find video existing error: {ex.Message}");
+        }
+    }
+
+    public async Task<IEnumerable<PlayerStatGetPlayersDto>> GetAllPlayersAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = GetAllPlayersCommand;
+            var rdr = await execute.ExecuteReaderAsync(cmd);
+            var players = new List<PlayerStatGetPlayersDto>();
+            if (rdr is not null)
+            {
+                do
+                {
+                    players.Add(new PlayerStatGetPlayersDto(
+                        MatchId: rdr.SafeGetInt("MatchId"),
+                        ClubId: rdr.SafeGetInt("ClubId"),
+                        PlayerId: rdr.SafeGetInt("PlayerId"),
+                        ClubName: rdr.SafeGetString("ClubName"),
+                        ClubCrest: rdr.SafeGetString("ClubCrest"),
+                        ClubTheme: rdr.SafeGetString("ClubTheme"),
+                        FirstName: rdr.SafeGetString("FirstName"),
+                        LastName: rdr.SafeGetString("LastName"),
+                        Position: rdr.SafeGetString("Position"),
+                        PlayerNumber: rdr.SafeGetInt("PlayerNumber"),
+                        Photo: rdr.SafeGetString("Photo")
+                    ));
+                } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
+            }
+            return players;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
         }
     }
 

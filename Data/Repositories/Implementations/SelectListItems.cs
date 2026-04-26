@@ -17,6 +17,60 @@ public class SelectListItems : ISelectListItems
         this.execute = execute;
     }
 
+    public async Task<IEnumerable<T>> SelectListItemAsync<T>(string commandText, Func<SqlDataReader, T> mapFunc, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand { CommandText = commandText };
+            var rdr = await execute.ExecuteReaderAsync(cmd);
+            var selectListItems = new List<T>();
+
+            if (rdr is not null)
+            {
+                do
+                {
+                    var item = mapFunc(rdr);
+                    selectListItems.Add(item);
+                } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
+            }
+            return selectListItems;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<IEnumerable<T>> SelectListItemAsync<T>(string commandText, Dictionary<string, string>? sqlParams, Func<SqlDataReader, T> mapFunc, CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand { CommandText = commandText };
+            if (sqlParams is not null)
+                foreach (var param in sqlParams)
+                {
+                    cmd.Parameters.AddWithValue(param.Key, param.Value);
+                }
+
+            var rdr = await execute.ExecuteReaderAsync(cmd);
+            var selectListItems = new List<T>();
+
+            if (rdr is not null)
+            {
+                do
+                {
+                    var item = mapFunc(rdr);
+                    selectListItems.Add(item);
+                } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
+            }
+            return selectListItems;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
     public async Task<List<SelectListItemClub>> SelectListItemClubAsync(CancellationToken ct = default)
     {
         try

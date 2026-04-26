@@ -10,5 +10,6 @@ public interface IVideoRepository
     Task<bool> FindVideoExisting(VideoDto videoDto, int? videoId = 0);
     Task<VideoDto> GetVideoByIdAsync(int videoId, CancellationToken ct = default);
     Task<IEnumerable<VideoDetailDto>> GetAllVideosAsync(int? page = 1, int? pageSize = 20, CancellationToken ct = default);
+    Task<IEnumerable<PlayerStatGetPlayersDto>> GetAllPlayersAsync(CancellationToken ct = default);
     Task<int> GetVideoCountAsync(CancellationToken ct = default);
 }

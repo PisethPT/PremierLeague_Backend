@@ -4,6 +4,7 @@ using PremierLeague_Backend.Models.ViewModels;
 using PremierLeague_Backend.Helper.SqlCommands;
 using PremierLeague_Backend.Models.DTOs;
 using PremierLeague_Backend.Helper;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace PremierLeague_Backend.Controllers
 {
@@ -32,6 +33,7 @@ namespace PremierLeague_Backend.Controllers
                 viewModel.SelectListItemNewsTag = await selectListItems.SelectListItemHasSubtitleAsync(SelectListItemCommands.CommandSelectListItemNewsTag);
                 viewModel.SelectListItemClubs = await selectListItems.SelectListItemClubAsync();
                 viewModel.SelectListItemMatches = await selectListItems.SelectListItemMatchesAsync(SelectListItemCommands.SelectListItemMatchCommands);
+                viewModel.SelectListItemNewsCategories = await selectListItems.SelectListItemsAsync("PL_CommandSelectListItemNewsCategories");
                 ViewBag.TotalCount = viewModel.NewsDetailDtos.Count();
                 ViewBag.CurrentPage = 1;
                 ViewBag.TotalPages = (int)Math.Ceiling((double)ViewBag.TotalCount / 10);

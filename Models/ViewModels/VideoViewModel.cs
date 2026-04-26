@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.Rendering;
 using PremierLeague_Backend.Models.DTOs;
 using PremierLeague_Backend.Models.SelectListItems;
 
@@ -6,12 +7,16 @@ namespace PremierLeague_Backend.Models.ViewModels;
 public class VideoViewModel
 {
     public IEnumerable<VideoDetailDto> VideoDetailDtos { get; set; }
+    public IEnumerable<SelectListItemClub> SelectListItemClubs { get; set; }
+    public IEnumerable<PlayerStatGetPlayersDto> SelectListItemPlayers { get; set; }
     public VideoDto VideoDto { get; set; }
-    public IEnumerable<SelectListItemHasSubtitle> SelectListItemVideoCategory { get; set; }
+    public IEnumerable<SelectListItem> selectListItemVideoTag { get; set; }
     public VideoViewModel()
     {
         this.VideoDetailDtos = new List<VideoDetailDto>();
         this.VideoDto = new VideoDto();
-        this.SelectListItemVideoCategory = new List<SelectListItemHasSubtitle>();
+        this.selectListItemVideoTag = new List<SelectListItem>();
+        this.SelectListItemClubs = new List<SelectListItemClub>();
+        this.SelectListItemPlayers = new List<PlayerStatGetPlayersDto>();
     }
 }

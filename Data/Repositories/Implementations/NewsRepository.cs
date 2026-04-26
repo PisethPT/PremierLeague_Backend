@@ -35,6 +35,7 @@ public class NewsRepository : INewsRepository
             cmd.Parameters.AddWithValue("@ReferenceUrl", newsDto.ReferenceUrl);
             cmd.Parameters.AddWithValue("@VideoReferenceUrl", newsDto.VideoReferenceUrl);
             cmd.Parameters.AddWithValue("@NewsTagId", newsDto.NewsTagId);
+            cmd.Parameters.AddWithValue("@NewsCategoryId", newsDto.NewsCategoryId);
             cmd.Parameters.AddWithValue("@ImageUrl", newsDto.ImageUrl);
             cmd.Parameters.AddWithValue("@PublishedDate", newsDto.PublishedDate);
             cmd.Parameters.AddWithValue("@ExpireDate", newsDto.ExpiryDate);
@@ -42,9 +43,11 @@ public class NewsRepository : INewsRepository
             cmd.Parameters.AddWithValue("@MatchId", newsDto.MatchId);
             cmd.Parameters.AddWithValue("@ClubId", newsDto.ClubId);
             cmd.Parameters.AddWithValue("@IsActive", newsDto.IsActive);
-            cmd.Parameters.AddWithValue("@IsFeatured", newsDto.IsActive);
+            cmd.Parameters.AddWithValue("@IsFeatured", newsDto.IsFeatured);
             cmd.Parameters.AddWithValue("@IsVideo", newsDto.IsVideo);
             cmd.Parameters.AddWithValue("@IsQuizzes", newsDto.IsQuizzes);
+            cmd.Parameters.AddWithValue("@IsRelatedContent", newsDto.IsRelatedContent);
+            cmd.Parameters.AddWithValue("@IsPremierLeagueGame", newsDto.IsPremierLeagueGame);
             return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
         }
         catch (SqlException ex)
@@ -160,7 +163,7 @@ public class NewsRepository : INewsRepository
         try
         {
             if (newsDto is null) throw new ArgumentNullException(nameof(newsDto));
-            if(newsDto.ImageFile is not null || newsDto.ImageFile?.Length > 0)
+            if (newsDto.ImageFile is not null || newsDto.ImageFile?.Length > 0)
             {
                 if (!string.Equals(newsDto.ImageFile?.FileName, "none.png", StringComparison.OrdinalIgnoreCase))
                     newsDto.ImageUrl = await storageService.SavePhotoAsync(newsDto.ImageFile!, _newsFolder);
@@ -175,6 +178,7 @@ public class NewsRepository : INewsRepository
             cmd.Parameters.AddWithValue("@ReferenceUrl", newsDto.ReferenceUrl);
             cmd.Parameters.AddWithValue("@VideoReferenceUrl", newsDto.VideoReferenceUrl);
             cmd.Parameters.AddWithValue("@NewsTagId", newsDto.NewsTagId);
+            cmd.Parameters.AddWithValue("@NewsCategoryId", newsDto.NewsCategoryId);
             cmd.Parameters.AddWithValue("@ImageUrl", newsDto.ImageUrl);
             cmd.Parameters.AddWithValue("@PublishedDate", newsDto.PublishedDate);
             cmd.Parameters.AddWithValue("@ExpireDate", newsDto.ExpiryDate);
@@ -182,9 +186,11 @@ public class NewsRepository : INewsRepository
             cmd.Parameters.AddWithValue("@MatchId", newsDto.MatchId);
             cmd.Parameters.AddWithValue("@ClubId", newsDto.ClubId);
             cmd.Parameters.AddWithValue("@IsActive", newsDto.IsActive);
-            cmd.Parameters.AddWithValue("@IsFeatured", newsDto.IsActive);
+            cmd.Parameters.AddWithValue("@IsFeatured", newsDto.IsFeatured);
             cmd.Parameters.AddWithValue("@IsVideo", newsDto.IsVideo);
             cmd.Parameters.AddWithValue("@IsQuizzes", newsDto.IsQuizzes);
+            cmd.Parameters.AddWithValue("@IsRelatedContent", newsDto.IsRelatedContent);
+            cmd.Parameters.AddWithValue("@IsPremierLeagueGame", newsDto.IsPremierLeagueGame);
             return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
         }
         catch (SqlException ex)
