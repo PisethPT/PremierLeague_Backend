@@ -4,6 +4,8 @@ const MATCH_EVENTS_ENDPOINT = {
   UPDATE_MATCH_EVENTS_ENDPOINT: MATCH_EVENTS_BASE_CONTROLLER + "/update",
   GET_MATCH_EVENT_ENDPOINT: MATCH_EVENTS_BASE_CONTROLLER + "/get-match-event",
   GET_PLAYER_ENDPOINT: MATCH_EVENTS_BASE_CONTROLLER + "/get-players",
+  GET_MATCH_EVENT_TYPES_ENDPOINT:
+    MATCH_EVENTS_BASE_CONTROLLER + "/get-match-event-types",
 };
 
 (async () => {
@@ -211,6 +213,212 @@ function toggleGetPlayers(matchId, clubId, isHomeClub = true) {
       window.playerInst.updateOptions(itemOptions);
     },
   });
+}
+
+function toggleGetMatchEventTypes(matchId) {
+  try {
+    $.ajax({
+      url: MATCH_EVENTS_ENDPOINT.GET_MATCH_EVENT_TYPES_ENDPOINT + "/" + matchId,
+      method: "GET",
+      headers: {
+        RequestVerificationToken: $(
+          'input[name="__RequestVerificationToken"]',
+        ).val(),
+      },
+      success: function (response) {
+        if (response.statusCode !== 200) {
+          alert(response.message);
+          return;
+        }
+
+        const { matchEvent, matchEventTypeDetail } = response.data;
+        const container = $("#matchEventTypesId");
+
+        container.empty();
+
+        setTimeout(() => {
+          const grouped = {};
+          matchEventTypeDetail.forEach((x) => {
+            if (!grouped[x.eventTypeId]) grouped[x.eventTypeId] = [];
+            grouped[x.eventTypeId].push(x);
+          });
+
+          matchEvent.forEach((type) => {
+            const details = grouped[type.eventTypeId] || [];
+
+            let html = `
+          <div class="accordion-item">
+            <div onclick="toggleAccordion(this)"
+              class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
+              
+              <div class="relative">
+                <span class="text-xs font-medium text-white uppercase tracking-wider">
+                  ${type.eventTypeName}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-center rounded-full bg-[#37003c] w-6 h-6">
+                <i class="fa-solid fa-chevron-down text-white text-xs transition-transform duration-300"></i>
+              </div>
+            </div>
+
+            <div class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
+          `;
+
+            if (details.length > 0) {
+              details.forEach((d) => {
+                if (d.matchEventId !== 0) {
+                  if (d.isHomeClub) {
+                    html += `
+                  <div class="p-3 flex flex-row justify-between">
+                    
+                    <div class="flex gap-4">
+                      <div class="w-[4px] h-full rounded-r-md"
+                        style="background-color:${d.clubTheme}">
+                      </div>
+
+                      <div class="flex gap-3">
+                        <div class="relative inline-block">
+                          <div class="relative inline-block overflow-hidden group rounded-xl">
+                            
+                            <div class="flex justify-center pt-1 px-2">
+                              <img src="/upload/players/${d.photo}" 
+                                   class="h-14 w-auto object-cover relative z-20">
+                            </div>
+
+                            <div class="absolute inset-0 rounded-xl bg-[rgba(118,4,131,0.3)] z-10"></div>
+                          </div>
+                        </div>
+
+                        <div class="text-white text-start font-bold">
+                          <span class="font-normal">${d.firstName}</span>
+                          <span class="font-bold">${d.lastName}</span>
+
+                          <div class="flex gap-2">
+                            <span class="text-gray-400 text-xs">
+                              ${d.playerNumber} • ${d.position}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex flex-col gap-4 justify-end">
+                      <div class="text-gray-400 text-end font-bold">
+                        ${d.minute}"
+                      </div>
+
+                      <div class="flex items-center gap-1">
+                        <div class="bg-red-700 w-4 h-4 rounded-full flex items-center justify-center">
+                          <span class="text-white text-[11px] font-bold">-</span>
+                        </div>
+
+                        <button onclick="toggleEditMatchEvent(${d.matchEventId}, true)"
+                          class="text-red-700 text-sm hover:underline">
+                          Edit events
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                  `;
+                  } else {
+                    html += `
+                  <div class="p-3 flex flex-row justify-between">
+
+                    <div class="flex flex-col gap-4">
+                      <div class="text-gray-400 font-bold">
+                        ${d.minute}"
+                      </div>
+
+                      <div class="flex items-center gap-1">
+                        <div class="bg-red-700 w-4 h-4 rounded-full flex items-center justify-center">
+                          <span class="text-white text-[11px] font-bold">-</span>
+                        </div>
+
+                        <button onclick="toggleEditMatchEvent(${d.matchEventId}, false)"
+                          class="text-red-700 text-sm hover:underline">
+                          Edit events
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                      <div class="flex gap-3">
+
+                        <div class="text-white text-end font-bold">
+                          <span class="font-normal">${d.firstName}</span>
+                          <span class="font-bold">${d.lastName}</span>
+
+                          <div class="flex justify-end gap-2">
+                            <span class="text-gray-400 text-xs">
+                              ${d.playerNumber} • ${d.position}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div class="relative inline-block">
+                          <div class="relative overflow-hidden rounded-xl">
+                            <div class="flex justify-center pt-1 px-2">
+                              <img src="/upload/players/${d.photo}" 
+                                   class="h-14 w-auto object-cover relative z-20">
+                            </div>
+
+                            <div class="absolute inset-0 rounded-xl bg-[rgba(118,4,131,0.3)] z-10"></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="w-[4px] h-full rounded-l-md"
+                        style="background-color:${d.clubTheme}">
+                      </div>
+                    </div>
+
+                  </div>
+                  `;
+                  }
+                } else {
+                  html += `
+              <div class="p-3 flex justify-between">
+                <div class="text-white">No events added yet.</div>
+              </div>
+            `;
+                }
+              });
+            } else {
+              html += `
+              <div class="p-3 flex justify-between">
+                <div class="text-white">No events added yet.</div>
+              </div>
+            `;
+            }
+
+            html += `</div></div>`;
+
+            container.append(html);
+          });
+        }, 500);
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        alert(JSON.stringify(error));
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    alert(JSON.stringify(error));
+  }
+}
+
+function handleRowClick(row, matchId) {
+  $("#matchTableId")
+    .closest("table")
+    .find("tbody tr")
+    .removeClass("active-row");
+
+  $(row).addClass("active-row");
+
+  toggleGetMatchEventTypes(matchId);
 }
 
 $("#playerSelect").on("change", function () {

@@ -39,7 +39,7 @@ public class NewsDto
     public int? MatchId { get; set; }
     public int? ClubId { get; set; }
 
-    [Required(ErrorMessage = "News Image is required")]
-    [DataType(DataType.Upload)]
+    // [Required(ErrorMessage = "News Image is required")]
+    // [DataType(DataType.Upload)]
     public IFormFile? ImageFile { get; set; }
 }

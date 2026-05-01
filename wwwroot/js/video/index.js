@@ -162,6 +162,7 @@ const resetForm = () => {
   form.find("textarea").val("");
 
   window.selectCategoryInst.setValue("");
+  window.selectVideoTagInst.setValue("");
 
   document.getElementById("clubContainer").innerHTML = "";
   document.getElementById("playerContainer").innerHTML = "";
@@ -217,6 +218,11 @@ function toggleEditVideo(videoId) {
   $.ajax({
     url: VIDEO_ENDPOINT.GET + "/" + videoId,
     method: "GET",
+    headers: {
+      RequestVerificationToken: $(
+        'input[name="__RequestVerificationToken"]',
+      ).val(),
+    },
     success: function (response) {
       if (response.statusCode !== 200) return;
 
@@ -228,17 +234,32 @@ function toggleEditVideo(videoId) {
 
       form.find("#videoId").val(data.videoId);
       form.find("#title").val(data.title);
-      form.find("#description").val(data.description);
+      form.find("#thumbnailUrl").val(data.thumbnailUrl);
+      form.find("#referenceUrl").val(data.referenceUrl);
       form.find("#videoUrl").val(data.videoUrl);
       form.find("#channel").val(data.channel);
-      form.find("#publisher").val(data.publisher);
+      form.find("#description").val(data.description);
+      form.find("#durationSeconds").val(data.durationSeconds);
+
+      $("#isStory").prop("checked", data.isStory);
+      $("#isStoryHidden").val(data.isStory ? "true" : "false");
+      $("#isReference").prop("checked", data.isReference);
+      $("#isReferenceHidden").val(data.isReference ? "true" : "false");
+      $("#isFeatured").prop("checked", data.isFeatured);
+      $("#isFeaturedHidden").val(data.isFeatured ? "true" : "false");
+      $("#isActive").prop("checked", data.isActive);
+      $("#isActiveHidden").val(data.isActive ? "true" : "false");
+
+      $("#isTheArchive").prop("checked", data.isTheArchive);
+      $("#isTheArchiveHidden").val(data.isTheArchive ? "true" : "false");
 
       if (data.publishedDate)
         $("#publishedDate").val(data.publishedDate.split("T")[0]);
 
       if (data.expiryDate) $("#expiryDate").val(data.expiryDate.split("T")[0]);
 
-      window.selectCategoryInst.setValue(data.videoCategoryId);
+      window.selectVideoTagInst.setValue(data.videoTagId);
+      toggleGetVideoCategory(data.isTheArchive, data.videoCategoryId);
 
       if (data.clubIds?.length) data.clubIds.forEach((id) => addClubSelect(id));
       else addClubSelect();
@@ -252,7 +273,7 @@ function toggleEditVideo(videoId) {
   });
 }
 
-function toggleGetVideoCategory(isTheArchive = false) {
+function toggleGetVideoCategory(isTheArchive = false, selectedValue = "") {
   return $.ajax({
     url: VIDEO_ENDPOINT.GET_VIDEO_CATEGORY + `/${isTheArchive}`,
     method: "GET",
@@ -274,7 +295,7 @@ function toggleGetVideoCategory(isTheArchive = false) {
       }));
 
       window.selectCategoryInst.updateOptions(itemOptions);
-      window.selectCategoryInst.setValue("");
+      window.selectCategoryInst.setValue(selectedValue);
     },
   });
 }

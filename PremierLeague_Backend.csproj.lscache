@@ -75,12 +75,14 @@ Data/
   GoalRepository.cs
   LineupRepository.cs
   MatchEventRepository.cs
+  MatchInfoRepository.cs
   MatchRepository.cs
   NewsRepository.cs
   PlayerRepository.cs
   PlayerStatRepository.cs
   SeasonRepository.cs
   SelectListItems.cs
+  TableRepository.cs
   UserRepository.cs
   VideoRepository.cs
  Repositories/Interfaces/
@@ -95,6 +97,7 @@ Data/
   IPlayerStatRepository.cs
   ISeasonRepository.cs
   ISelectListItems.cs
+  ITableRepository.cs
   IUserRepository.cs
   IVideoRepository.cs
 Helper/
@@ -108,6 +111,7 @@ Helper/
   LineupCommands.cs
   MatchCommands.cs
   MatchEventCommands.cs
+  MatchInfoCommands.cs
   NewsCommands.cs
   PlayerCommands.cs
   PlayerStatCommand.cs
@@ -135,6 +139,7 @@ Models/DTOs/
  MatchEventDto.cs
  MatchEventDuringMatchWeekDto.cs
  MatchEventTypesDto.cs
+ MatchInfoDetailDto.cs
  MatchInfoDto.cs
  MatchInfoMatchDetailsDto.cs
  MatchInfoMatchOfficialsDto.cs
@@ -153,6 +158,7 @@ Models/DTOs/
  PlayerStatMatchListDto.cs
  SeasonDetailDto.cs
  SeasonDto.cs
+ TableDto.cs
  UserDto.cs
  UserLoginDto.cs
  UserRolesDto.cs
@@ -180,11 +186,13 @@ Models/
   ClubViewModel.cs
   LineupViewModel.cs
   MatchEventViewModel.cs
+  MatchInfoViewModel.cs
   MatchViewModel.cs
   NewsViewModel.cs
   PlayerStatViewModel.cs
   PlayerViewModel.cs
   SeasonViewModel.cs
+  TableViewModel.cs
   UserViewModel.cs
   VideoViewModel.cs
 obj/Debug/net9.0/

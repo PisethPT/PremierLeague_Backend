@@ -13,7 +13,7 @@ public interface IMatchEventRepository
     Task<bool> FindExistsMatchEventByMatchEventIdAsync(MatchEventDto matchEventDto, CancellationToken ct = default);
     Task<MatchEventDto> FindMatchEventByIdAsync(int matchEventId, CancellationToken ct = default);
     Task<IEnumerable<MatchEventDuringMatchWeekDto>> GetMatchEventDuringMatchWeekAsync(int? seasonId, int week, int? page = 1, int? competitionId = 1, string? clubIdJson = null, CancellationToken ct = default);
-    Task<IEnumerable<MatchEventTypesDto>> GetMatchEventTypesAsync(int? matchId, CancellationToken ct = default);
+    Task<IEnumerable<MatchEventTypesDto>> GetMatchEventTypesAsync(CancellationToken ct = default);
     Task<IEnumerable<PlayerStatGetPlayersDto>> GetHomePlayersForPlayerStatByClubIdAndMatchIdAsync(int matchId, int clubId, CancellationToken ct = default);
     Task<IEnumerable<PlayerStatGetPlayersDto>> GetAwayPlayersForPlayerStatByClubIdAndMatchIdAsync(int matchId, int clubId, CancellationToken ct = default);
 }

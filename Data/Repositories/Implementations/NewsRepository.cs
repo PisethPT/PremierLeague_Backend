@@ -80,12 +80,13 @@ public class NewsRepository : INewsRepository
         }
     }
 
-    public async Task<IEnumerable<NewsDetailDto>> GetAllNewsDetailAsync(CancellationToken ct = default)
+    public async Task<IEnumerable<NewsDetailDto>> GetAllNewsDetailAsync(int page = 1, CancellationToken ct = default)
     {
         try
         {
             var cmd = new SqlCommand();
             cmd.CommandText = GetAllNewsDetailCommand;
+            cmd.Parameters.AddWithValue("@Page", page);
             var rdr = await execute.ExecuteReaderAsync(cmd);
             var newsDetailDtos = new List<NewsDetailDto>();
             if (rdr is not null)
@@ -135,20 +136,26 @@ public class NewsRepository : INewsRepository
                     {
                         NewsId = rdr.SafeGetInt("NewsId"),
                         NewsTagId = rdr.SafeGetInt("NewsTagId"),
+                        NewsCategoryId = rdr.SafeGetInt("NewsCategoryId"),
                         Title = rdr.SafeGetString("Title"),
                         Subtitle = rdr.SafeGetString("Subtitle"),
                         Content = rdr.SafeGetString("Content"),
                         ReferenceUrl = rdr.SafeGetString("ReferenceUrl"),
+                        VideoReferenceUrl = rdr.SafeGetString("VideoReferenceUrl"),
                         AuthorId = rdr.SafeGetString("AuthorId"),
                         PublishedDate = rdr.SafeGetDateTime("PublishedDate"),
                         ImageUrl = rdr.SafeGetString("ImageUrl"),
                         ExpiryDate = rdr.SafeGetDateTime("ExpiryDate"),
-                        IsActive = rdr.SafeGetBoolean("IsActive"),
                         MatchId = rdr.SafeGetInt("MatchId"),
-                        ClubId = rdr.SafeGetInt("ClubId")
+                        ClubId = rdr.SafeGetInt("ClubId"),
+                        IsFeatured = rdr.SafeGetBoolean("IsFeatured"),
+                        IsVideo = rdr.SafeGetBoolean("IsVideo"),
+                        IsQuizzes = rdr.SafeGetBoolean("IsQuizzes"),
+                        IsRelatedContent = rdr.SafeGetBoolean("IsRelatedContent"),
+                        IsPremierLeagueGame = rdr.SafeGetBoolean("IsPremierLeagueGame"),
+                        IsActive = rdr.SafeGetBoolean("IsActive")
                     };
                 } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
-
             }
             return newsDto;
         }
@@ -196,6 +203,41 @@ public class NewsRepository : INewsRepository
         catch (SqlException ex)
         {
             throw new Exception($"Database update news error: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<int> CountNewsAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = CountNewsCommand;
+
+            var rdr = await execute.ExecuteReaderAsync(cmd);
+            return rdr is not null ? rdr.GetInt32(rdr.GetOrdinal("TotalCount")) : 0;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<bool> FindNewsExisting(NewsDto newsDto, int? newsId = 0)
+    {
+        try
+        {
+            var cmd = new SqlCommand();
+            cmd.CommandText = FindNewsExistingCommand;
+            cmd.Parameters.AddWithValue("@NewsId", newsId);
+            cmd.Parameters.AddWithValue("@Title", newsDto.Title);
+            cmd.Parameters.AddWithValue("@NewsTagId", newsDto.NewsTagId);
+            cmd.Parameters.AddWithValue("@NewsCategoryId", newsDto.NewsCategoryId);
+            cmd.Parameters.AddWithValue("@PublishedDate", newsDto.PublishedDate);
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Database find news existing error: {ex.Message}");
         }
     }
 }

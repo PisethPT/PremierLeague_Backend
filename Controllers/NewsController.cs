@@ -4,10 +4,12 @@ using PremierLeague_Backend.Models.ViewModels;
 using PremierLeague_Backend.Helper.SqlCommands;
 using PremierLeague_Backend.Models.DTOs;
 using PremierLeague_Backend.Helper;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace PremierLeague_Backend.Controllers
 {
+    [Authorize]
     [Route("en/news")]
     public class NewsController : Controller
     {
@@ -25,18 +27,25 @@ namespace PremierLeague_Backend.Controllers
         }
 
         // GET: NewsController
-        public async Task<ActionResult> IndexAsync()
+        public async Task<ActionResult> IndexAsync(int page = 1)
         {
             try
             {
-                viewModel.NewsDetailDtos = await repository.GetAllNewsDetailAsync();
+                int pageSize = 20;
+                viewModel.NewsDetailDtos = await repository.GetAllNewsDetailAsync(page);
                 viewModel.SelectListItemNewsTag = await selectListItems.SelectListItemHasSubtitleAsync(SelectListItemCommands.CommandSelectListItemNewsTag);
                 viewModel.SelectListItemClubs = await selectListItems.SelectListItemClubAsync();
                 viewModel.SelectListItemMatches = await selectListItems.SelectListItemMatchesAsync(SelectListItemCommands.SelectListItemMatchCommands);
                 viewModel.SelectListItemNewsCategories = await selectListItems.SelectListItemsAsync("PL_CommandSelectListItemNewsCategories");
-                ViewBag.TotalCount = viewModel.NewsDetailDtos.Count();
-                ViewBag.CurrentPage = 1;
-                ViewBag.TotalPages = (int)Math.Ceiling((double)ViewBag.TotalCount / 10);
+
+                int totalCount = await repository.CountNewsAsync();
+                int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalPages = totalPages;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalCount = totalCount;
+
                 return View(viewModel);
             }
             catch (Exception ex)
@@ -54,7 +63,7 @@ namespace PremierLeague_Backend.Controllers
         {
             try
             {
-                newsDto.AuthorId = "12c64674-5ea2-484d-90b1-7419243b1758"; // TODO: Get user id from session
+                newsDto.AuthorId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "12c64674-5ea2-484d-90b1-7419243b1758";
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState
@@ -100,7 +109,7 @@ namespace PremierLeague_Backend.Controllers
         {
             try
             {
-                newsDto.AuthorId = "12c64674-5ea2-484d-90b1-7419243b1758"; // TODO: Get user id from session
+                newsDto.AuthorId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "12c64674-5ea2-484d-90b1-7419243b1758";
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState
@@ -121,6 +130,12 @@ namespace PremierLeague_Backend.Controllers
                         ModelState.AddModelError(nameof(newsDto.ImageFile), validation.ErrorMessage ?? "Invalid file");
                         return RedirectToAction(nameof(Index));
                     }
+                }
+
+                if (!await repository.FindNewsExisting(newsDto, newsId))
+                {
+                    ModelState.AddModelError(nameof(newsDto.Title), "A news item with this title already exists.");
+                    return RedirectToAction(nameof(Index));
                 }
 
                 var success = await repository.UpdateNewsAsync(newsDto);
@@ -149,6 +164,18 @@ namespace PremierLeague_Backend.Controllers
         {
             try
             {
+                if (newsId <= 0 || await repository.GetNewsByIdAsync(newsId) == null)
+                {
+                    ModelState.AddModelError(string.Empty, "News not found.");
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (await repository.GetNewsByIdAsync(newsId) is null)
+                {
+                    ModelState.AddModelError(string.Empty, $"News by id {newsId} not found.");
+                    return RedirectToAction(nameof(Index));
+                }
+
                 var success = await repository.DeleteNewsAsync(newsId, imageUrl);
                 if (!success)
                 {

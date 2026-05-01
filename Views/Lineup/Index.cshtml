@@ -262,7 +262,7 @@
                     <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-4 w-full">
                         <div class="flex items-center justify-between lg:justify-start gap-4">
                             <a href="@Url.Action("Index", "Lineup")"
-                                   class="inline-block bg-[#55005a] text-white px-4 py-2 hover:bg-[#410544] rounded-lg transition hover:ring-2 hover:!ring-[#8a3fbf] text-nowrap">Back
+                               class="inline-block bg-[#55005a] text-white px-4 py-2 hover:bg-[#410544] rounded-lg transition hover:ring-2 hover:!ring-[#8a3fbf] text-nowrap">Back
                                 to
                                 Home</a>
 
@@ -276,11 +276,14 @@
                             <div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden h-fit max-h-[83vh]">
                                 <h2 class="text-white text-md font-semibold uppercase">Matches</h2>
                                 <div class="overflow-y-auto overflow-x-auto max-h-[78vh] scrollbar-none overflow-hidden rounded-t-lg">
-                                    <table class="min-w-full divide-y divide-[#55005a]">
+                                    <table class="min-w-full divide-y divide-[#55005a]" id="matchTableId">
                                         <thead class="bg-[#55005a] sticky top-0 z-10">
                                             <tr>
                                                 <th class="px-1 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">
                                                     ID
+                                                </th>
+                                                <th class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">
+                                                    Action
                                                 </th>
                                                 <th
                                                     class="px-2 py-3 text-xs font-medium text-white uppercase tracking-wider text-center text-nowrap">
@@ -300,13 +303,26 @@
                                             @foreach (var match in Model.LineupDetailDto)
                                             {
                                                 index++;
-                                                <tr class="cursor-pointer" onclick="viewLineupFormation(@match.MatchId)">
+                                                <tr class="cursor-pointer" onclick="handleRowClick(this, @match.MatchId)">
                                                     <td class="px-1 py-4 whitespace-nowrap text-sm text-white">
                                                         <div class="flex justify-center items-center">
                                                             <div
                                                                 class="w-8 h-8 text-white text-sm font-bold text-center flex justify-center items-center bg-[#c] rounded-full ring-2 !ring-[#8a3fbf]">
                                                                 @index
                                                             </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
+                                                        <div class="flex justify-center items-center gap-2">
+                                                            <button onclick="toggleUpdate('@match.MatchId')"
+                                                                    class="w-9 h-9 text-white text-sm font-bold text-center flex justify-center items-center bg-[#8a3fbf] hover:bg-[#6b2fa0] rounded-xl hover:ring-2 hover:!ring-[#8a3fbf]">
+                                                                <i class="fa-solid fa-pencil"></i>
+                                                            </button>
+                                                            <button onclick="showModal('confirmDeleteModal', this, 'modal-lg', true)"
+                                                                    class="w-9 h-9 text-white text-sm font-bold text-center flex justify-center items-center bg-red-500 hover:bg-red-600 rounded-xl hover:ring-2 hover:!ring-[#8a3fbf]">
+                                                                <input type="text" name="matchId" value="@match.MatchId" hidden />
+                                                                <i class="fa-solid fa-circle-minus"></i>
+                                                            </button>
                                                         </div>
                                                     </td>
                                                     <td class="px-2 py-4 whitespace-nowrap text-sm text-white">
@@ -356,7 +372,7 @@
 
                             <div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden h-fit max-h-[90vh]">
                                 <h2 class="text-white text-md font-semibold uppercase tracking-wider">Lineup Formation</h2>
-    
+
                                 <div class="grid grid-cols-[1fr_2.5fr_1fr] gap-2 overflow-hidden rounded-lg h-[800px]">
 
                                     <div
@@ -380,7 +396,7 @@
                                                 <h4 class="text-[10px] text-white uppercase font-black tracking-[0.2em]">Substitutes</h4>
                                                 <div class="h-[1px] flex-1 bg-gradient-to-r from-white/20 to-transparent"></div>
                                             </div>
-    
+
                                             <div id="homeSubstitutes"
                                                  class="flex flex-col justify-start items-start gap-4 overflow-y-auto max-h-full pr-2 py-2 scrollbar-none">
                                             </div>
@@ -412,10 +428,10 @@
                                         class="bg-[#1e0021] rounded-tr-lg rounded-br-lg  border-2 border-[#55005a] p-4 flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar text-right">
                                         <div class="flex items-center justify-end gap-3">
                                             <h3 id="awayClubName" class="text-white font-bold uppercase"></h3>
-    
+
                                             <div id="awayClubTheme" style="background-color: #37003c"
                                                  class="flex justify-center items-center w-12 h-12 shadow rounded-xl p-1 overflow-hidden">
-        
+
                                                 <img id="awayClubCrest" src="~/upload/clubs/default_club.png"
                                                      class="h-12 max-w-full object-contain" />
                                             </div>
@@ -431,7 +447,7 @@
                                                 <h4 class="text-[10px] text-white uppercase font-black tracking-[0.2em]">Substitutes</h4>
                                                 <div class="h-[1px] flex-1 bg-gradient-to-r from-white/20 to-transparent"></div>
                                             </div>
-    
+
                                             <div id="awaySubstitutes"
                                                  class="flex flex-col justify-start items-start gap-4 overflow-y-auto max-h-full pr-2 py-2 scrollbar-none">
                                             </div>
@@ -454,15 +470,15 @@
 
                             <div class="ml-auto flex items-center gap-4">
                                 <a href="@Url.Action("Index", "News", new { page = ViewBag.CurrentPage - 1 })"
-                                       class="px-3 py-1 rounded bg-[#55005a] text-white transition
+                                   class="px-3 py-1 rounded bg-[#55005a] text-white transition
                                     @(ViewBag.CurrentPage == 1 ? "opacity-50 cursor-not-allowed pointer-events-none" : "hover:bg-[#410544] hover:ring-2 hover:!ring-[#8a3fbf]")"
-                                       aria-disabled="@(ViewBag.CurrentPage == 1)">
+                                   aria-disabled="@(ViewBag.CurrentPage == 1)">
                                     <i class="fa-solid fa-chevron-left"></i>
                                 </a>
                                 <a href="@Url.Action("Index", "News", new { page = ViewBag.CurrentPage + 1 })"
-                                       class="px-3 py-1 rounded bg-[#55005a] text-white transition
+                                   class="px-3 py-1 rounded bg-[#55005a] text-white transition
                                     @(ViewBag.CurrentPage == ViewBag.TotalPages ? "opacity-50 cursor-not-allowed pointer-events-none" : "hover:bg-[#410544] hover:ring-2 hover:!ring-[#8a3fbf]")"
-                                       aria-disabled="@(ViewBag.CurrentPage == ViewBag.TotalPages)">
+                                   aria-disabled="@(ViewBag.CurrentPage == ViewBag.TotalPages)">
                                     <i class="fa-solid fa-chevron-right"></i>
                                 </a>
                             </div>
@@ -473,6 +489,14 @@
                         <partial name="_ValidationScriptsPartial" />
                         <script src="/js/lineup/index.js" asp-append-version="true"></script>
                         <script src="/js/lineup/formation.js" asp-append-version="true"></script>
+                        <script type="module" src="/js/lineup/update.js"></script>
                         <script src="/js/lineup/delete.js" asp-append-version="true"></script>
-                        <script src="/js/lineup/update.js" asp-append-version="true"></script>
+                    }
+
+                    @section Styles {
+                        <style>
+                            .active-row {
+                            background-color: rgba(138, 63, 191, 0.2);
+                            }
+                        </style>
                     }

@@ -14,7 +14,8 @@ const LINEUP_ENDPOINT = {
   GET_LINEUP_FORMATION_LAYOUT_BY_FORMATION_ID_ENDPOINT:
     LINEUP_BASE_CONTROLLER + "/get-lineup-formation-layout-by-formation-id",
   GET_LINEUP_BY_MATCH_ID_ENDPOINT:
-    LINEUP_BASE_CONTROLLER + "/get-lineup-by-match",
+    LINEUP_BASE_CONTROLLER + "/get-lineup-by-match-id",
+  GET_MATCH_ITEMS_ENDPOINT: LINEUP_BASE_CONTROLLER + "/get-match-items",
 };
 
 const BASE_CLUB_PATH = "/upload/clubs/";
@@ -45,7 +46,7 @@ const resetForm = () => {
   if (window.matchSelectInst) {
     window.matchSelectInst.reset();
   }
-  
+
   $("#homeClubFormation").val("1");
   $("#awayClubFormation").val("1");
 
@@ -79,6 +80,7 @@ $("#btnAddLineup").on("click", async function () {
   const form = $("#lineupForm");
   resetForm();
   form.attr("action", LINEUP_ENDPOINT.CREATE_LINEUP_ENDPOINT);
+  getMatchItems(false);
   openModal("modal-8xl", true);
 });
 
@@ -313,6 +315,48 @@ async function getLineupFormationDetail(matchId) {
   });
 }
 
+async function getMatchItems(isEdit = false, existingMatchId = "") {
+  try {
+    $.ajax({
+      url: LINEUP_ENDPOINT.GET_MATCH_ITEMS_ENDPOINT + "/" + isEdit,
+      method: "GET",
+      headers: {
+        RequestVerificationToken: $(
+          'input[name="__RequestVerificationToken"]',
+        ).val(),
+      },
+      success: function (response) {
+        if (response.statusCode !== 200) {
+          alert(response.message);
+          return;
+        }
+        const data = response.data.item;
+
+        if (window.matchSelectInst && data) {
+          window.matchSelectInst.setData(data);
+
+          if (existingMatchId) {
+            window.matchSelectInst.setValue(existingMatchId);
+            $("#lineupForm").find("#matchSelectId").val(existingMatchId);
+          }
+        } else {
+          console.error("Match selection failed: Instance or data missing", {
+            instance: window.matchSelectInst,
+            data: data,
+          });
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        alert(JSON.stringify(error));
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    alert(JSON.stringify(error));
+  }
+}
+
 function renderTeam(teamId, formationString, allPlayers) {
   const container = document.getElementById(teamId);
   const isHome = teamId === "homePitch";
@@ -447,4 +491,13 @@ function activateTab(tabId) {
   if (tabBtn) {
     tabBtn.click();
   }
+}
+
+function handleRowClick(row, matchId) {
+  $("#matchTableId")
+    .closest("table")
+    .find("tbody tr")
+    .removeClass("active-row");
+  viewLineupFormation(matchId);
+  $(row).addClass("active-row");
 }

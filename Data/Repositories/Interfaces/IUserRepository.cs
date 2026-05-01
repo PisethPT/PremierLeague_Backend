@@ -15,4 +15,7 @@ public interface IUserRepository
     Task<bool> UpdateUserAsync(UserDto user, CancellationToken ct = default);
     Task<bool> DeleteUserAsync(string userId, string? photo, CancellationToken ct = default);
     Task<List<UserDto>> GetAllUsersAsync(CancellationToken ct = default);
+    Task<bool> SaveRefreshTokenAsync(string userId, string refreshToken, DateTime expiryDate, CancellationToken ct = default);
+    Task<bool> ValidateRefreshTokenAsync(string userId, string refreshToken, CancellationToken ct = default);
+    Task<bool> RevokeRefreshTokenAsync(string userId, CancellationToken ct = default);
 }

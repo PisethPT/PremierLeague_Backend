@@ -24,6 +24,8 @@ public static class DependenciesConfig
         builder.Services.AddScoped<IMatchEventRepository, MatchEventRepository>();
         builder.Services.AddScoped<INewsRepository, NewsRepository>();
         builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+        builder.Services.AddScoped<IMatchInfoRepository, MatchInfoRepository>();
+        builder.Services.AddScoped<ITableRepository, TableRepository>();
 
         // select list item
         builder.Services.AddScoped<ISelectListItems, SelectListItems>();

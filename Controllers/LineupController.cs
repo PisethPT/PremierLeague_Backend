@@ -3,9 +3,11 @@ using PremierLeague_Backend.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using PremierLeague_Backend.Models.DTOs;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PremierLeague_Backend.Controllers
 {
+    [Authorize]
     [Route("en/lineups")]
     public class LineupController : Controller
     {
@@ -29,7 +31,6 @@ namespace PremierLeague_Backend.Controllers
             try
             {
                 viewModel.LineupDetailDto = await repository.GetAllLineupsAsync(page);
-                viewModel.SelectListItemMatchForLineups = await selectList.SelectListItemMatchForLineupAsync();
                 ViewBag.TotalCount = viewModel.LineupDetailDto.Count();
                 ViewBag.CurrentPage = page;
                 ViewBag.TotalPages = (int)Math.Ceiling((double)ViewBag.TotalCount / 20);
@@ -421,5 +422,44 @@ namespace PremierLeague_Backend.Controllers
                 );
             }
         }
+
+        // POST: LineupController/GetMatches
+        [HttpGet("get-match-items/{isEdit:bool}")]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> GetMatchItemsAsync([FromRoute] bool isEdit)
+        {
+            try
+            {
+                var item = await selectList.SelectListItemMatchForLineupAsync(isEdit);
+                if (!item.Any())
+                {
+                    throw new Exception("Match not found.");
+                }
+
+                return Json(
+                    new
+                    {
+                        StatusCode = 200,
+                        Data = new
+                        {
+                            item
+                        },
+                        Message = "Commit Transaction Success."
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error loading match {isEdit}");
+                return Json(
+                    new
+                    {
+                        StatusCode = 400,
+                        Message = ex.Message,
+                    }
+                );
+            }
+        }
+
     }
 }

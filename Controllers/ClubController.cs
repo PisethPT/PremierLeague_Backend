@@ -23,10 +23,27 @@ namespace PremierLeague_Backend.Controllers
 
         // GET: ClubController/Index
         [HttpGet]
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(int page = 1)
         {
-            viewModel.clubDtos = await _clubRepository.GetAllClubsAsync();
             viewModel.clubDto = new ClubDto();
+            try
+            {
+                int pageSize = 20;
+                viewModel.clubDtos = await _clubRepository.GetAllClubsAsync(page);
+
+                int totalCount = await _clubRepository.GetCountAsync();
+                int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalPages = totalPages;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalCount = totalCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching club list: {Message}", ex.Message);
+                ModelState.AddModelError(string.Empty, "Unable to load club list. Please try again later or contact admin.");
+            }
             return View(viewModel);
         }
 

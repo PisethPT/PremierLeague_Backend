@@ -228,12 +228,13 @@ public class SelectListItems : ISelectListItems
         }
     }
 
-    public async Task<List<SelectListItemMatch>> SelectListItemMatchForLineupAsync(CancellationToken ct = default)
+    public async Task<List<SelectListItemMatch>> SelectListItemMatchForLineupAsync(bool isEdit, CancellationToken ct = default)
     {
         try
         {
             var cmd = new SqlCommand();
             cmd.CommandText = SelectListItemMatchForLineupCommands;
+            cmd.Parameters.AddWithValue("@IsEdit", isEdit);
             using var rdr = await execute.ExecuteReaderAsync(cmd);
             var SelectListItem = new List<SelectListItemMatch>();
             if (rdr is not null)

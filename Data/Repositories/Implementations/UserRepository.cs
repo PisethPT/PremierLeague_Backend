@@ -6,6 +6,7 @@ using PremierLeague_Backend.Models.Enums;
 using PremierLeague_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using static PremierLeague_Backend.Helper.SqlCommands.UserCommands;
+using PremierLeague_Backend.Helper;
 
 namespace PremierLeague_Backend.Data.Repositories.Implementations;
 
@@ -262,6 +263,72 @@ public class UserRepository : IUserRepository
         cmd.Parameters.AddWithValue("@Email", email);
         cmd.Parameters.AddWithValue("@UserId", userId);
 
+        try
+        {
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<bool> SaveRefreshTokenAsync(string userId, string refreshToken, DateTime expiryDate, CancellationToken ct = default)
+    {
+        string combinedValue = $"{refreshToken}|{expiryDate:O}";
+
+        var cmd = new SqlCommand();
+        cmd.CommandText = "PL_AspNetUserSaveRefreshToken";
+        cmd.Parameters.AddWithValue("@UserId", userId);
+        cmd.Parameters.AddWithValue("@Value", combinedValue);
+        try
+        {
+            return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<bool> ValidateRefreshTokenAsync(string userId, string refreshToken, CancellationToken ct = default)
+    {
+
+        var cmd = new SqlCommand();
+        cmd.CommandText = "PL_AspNetUserValidateRefreshToken";
+        cmd.Parameters.AddWithValue("@UserId", userId);
+        try
+        {
+            await using var rdr = await execute.ExecuteReaderAsync(cmd).ConfigureAwait(false);
+            var storedValue = string.Empty;
+            if (rdr is not null)
+            {
+                do
+                {
+                    storedValue = rdr.SafeGetString("Value") ?? string.Empty;
+                } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
+            }
+            if (string.IsNullOrEmpty(storedValue)) return false;
+
+            var parts = storedValue.Split('|');
+            if (parts.Length < 2) return false;
+
+            var dbToken = parts[0];
+            var expiryDate = DateTime.Parse(parts[1]);
+
+            return dbToken == refreshToken && expiryDate > DateTime.UtcNow;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<bool> RevokeRefreshTokenAsync(string userId, CancellationToken ct = default)
+    {
+        var cmd = new SqlCommand();
+        cmd.CommandText = "PL_AspNetUserRevokeRefreshToken";
+        cmd.Parameters.AddWithValue("@UserId", userId);
         try
         {
             return await execute.ExecuteScalarAsync<bool>(cmd) ? false : true;

@@ -1,8 +1,132 @@
-﻿@{
+﻿@model PremierLeague_Backend.Models.ViewModels.TableViewModel
+
+@{
     ViewData["Title"] = "Table";
+
+    string FormatUrl(string name)
+    {
+        return name?.ToLower().Replace(" ", "-") ?? "";
+    }
 }
-<div class="p-4 bg-[#37003c] rounded-lg shadow-lg">
-    <h1 class="text-2xl text-white font-bold mb-4">Welcome to the @ViewData["Title"]!</h1>
-    <p class="text-gray-300">This is the home page of the EPL backend application. Use the navigation menu to explore
-        different sections.</p>
+
+<div class="flex-1 overflow-x-auto overflow-y-auto mt-4 mx-4 rounded-2xl !bg-[#37003c] py-4 pe-2">
+
+    <div class="min-w-fit px-2">
+
+        <div class="grid grid-cols-[90px_300px_1fr] text-white font-normal text-[16px] pb-2 mb-2">
+            <div class="sticky left-0 px-3 text-center">Pos</div>
+            <div class="sticky left-[90px] px-3">Team</div>
+
+            <div class="grid justify-self-end pr-6"
+                 style="grid-template-columns:50px 50px 50px 50px 50px 50px 50px 170px 50px 60px">
+
+                <div class="text-center">PI</div>
+                <div class="text-center">W</div>
+                <div class="text-center">D</div>
+                <div class="text-center">L</div>
+                <div class="text-center">GF</div>
+                <div class="text-center">GA</div>
+                <div class="text-center">GD</div>
+                <div class="text-center">Form</div>
+                <div class="text-center">Pts</div>
+                <div class="text-center">Next</div>
+
+            </div>
+        </div>
+
+        @foreach (var row in Model.Tables)
+        {
+            <div
+                class="relative grid grid-cols-[90px_300px_1fr] items-center text-white text-sm hover:bg-[#3a0040] rounded-lg transition h-[59px] mt-1 group">
+
+                <div class="sticky left-0 z-10 p-3 text-lg font-bold text-center flex items-center justify-center gap-4 ">
+                    @row.Position
+                    <div class="flex items-center justify-center">
+                        @if (row.PositionStatus == "UP")
+                        {
+                            <i class="fa-solid fa-angle-up text-sm text-green-500"></i>
+                        }
+                        else if (row.PositionStatus == "DOWN")
+                        {
+                            <i class="fa-solid fa-angle-down text-sm text-red-500"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-minus text-sm text-gray-400"></i>
+                        }
+                    </div>
+                </div>
+
+                <div class="sticky left-[90px] z-10 p-3 font-bold flex items-center gap-2  w-fit">
+                    <img src="@row.ClubCrest" class="w-8 h-8 object-contain" />
+                    <a href="/clubs/overview/@row.ClubId/@FormatUrl(row.ClubName)"
+                       class="text-[17px] font-bold hover:underline">
+                        @row.ClubName
+                    </a>
+                </div>
+
+                <div class="grid justify-self-end pr-6 items-center"
+                     style="grid-template-columns:50px 50px 50px 50px 50px 50px 50px 170px 50px 60px">
+
+                    <div class="text-center">@row.Played</div>
+                    <div class="text-center">@row.Wins</div>
+                    <div class="text-center">@row.Draws</div>
+                    <div class="text-center">@row.Losses</div>
+                    <div class="text-center">@row.GF</div>
+                    <div class="text-center">@row.GA</div>
+                    <div class="text-center">@row.GD</div>
+
+                    <div class="flex justify-center gap-1 px-2">
+                        @foreach (var f in (row.Form ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var trim = f.Trim();
+                            var bg = trim == "W" ? "#22c55e" : trim == "D" ? "#e5e7eb" : "#ef4444";
+                            var color = trim == "D" ? "#000" : "#fff";
+
+                            <div class="w-6 h-6 text-[10px] font-bold rounded-full flex items-center justify-center"
+                                 style="background-color:@bg;color:@color">
+                                @trim
+                            </div>
+                        }
+                    </div>
+
+                    <div class="text-center font-bold">@row.Points</div>
+
+                    <div class="flex justify-center">
+                        @if (!string.IsNullOrEmpty(row.Next))
+                        {
+                            <img src="@row.Next" class="w-8 h-8 object-contain" />
+                        }
+                    </div>
+
+                </div>
+
+                @if (row.Qualification == "UCL")
+                {
+                    <div class="absolute left-0 top-0 h-full w-1 bg-blue-500 z-10 rounded-r-lg"></div>
+                }
+                else if (row.Qualification == "UEL")
+                {
+                    <div class="absolute left-0 top-0 h-full w-1 bg-orange-500 z-10 rounded-r-lg"></div>
+                }
+                else if (row.Qualification == "RELEGATION")
+                {
+                    <div class="absolute left-0 top-0 h-full w-1 bg-pink-500 z-10 rounded-r-lg"></div>
+                }
+
+            </div>
+        }
+
+    </div>
+</div>
+
+<div class="flex items-center gap-3 flex-wrap mx-4 mt-6">
+    <div class="w-4 h-2 bg-blue-500 rounded-xs"></div>
+    <span class="text-white text-sm">Champions League Qualification</span>
+
+    <div class="w-4 h-2 bg-orange-500 rounded-xs"></div>
+    <span class="text-white text-sm">Europa League Qualification</span>
+
+    <div class="w-4 h-2 bg-pink-500 rounded-xs"></div>
+    <span class="text-white text-sm">Relegation Qualification</span>
 </div>

@@ -223,7 +223,6 @@ public class PlayerRepository : IPlayerRepository
             throw new Exception(ex.Message);
         }
     }
-
     public async Task<int> CountPlayersAsync(string? positionJson = null, string? clubIdJson = null, CancellationToken ct = default)
     {
         try
@@ -273,6 +272,7 @@ public class PlayerRepository : IPlayerRepository
 
         return Position.Unknown;
     }
+    
     PreferredFoot MapPreferredFoot(object dbValue)
     {
         if (dbValue == null)

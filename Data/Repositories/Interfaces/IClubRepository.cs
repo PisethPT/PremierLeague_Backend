@@ -12,13 +12,15 @@ public interface IClubRepository
     Task<bool> DeleteClubAsync(int id, CancellationToken ct = default);
 
     Task<ClubDto?> GetClubByIdAsync(int id, CancellationToken ct = default);
-    Task<List<ClubDto>> GetAllClubsAsync(CancellationToken ct = default);
+    Task<List<ClubDto>> GetAllClubsAsync(int page = 1, CancellationToken ct = default);
 
     // DataTable / DataSet helpers
-    Task<DataTable> GetAllCClubsTableAsync(CancellationToken ct = default);
+    Task<DataTable> GetAllClubsTableAsync(CancellationToken ct = default);
     Task<DataTable> GetClubByIdTableAsync(int id, CancellationToken ct = default);
     Task<DataSet> GetAllClubsDataSetAsync(CancellationToken ct = default);
 
     // Validations
     Task<bool> ExistsByNameAsync(string clubName, int? clubId = null, CancellationToken ct = default);
+
+    Task<int> GetCountAsync(CancellationToken ct = default);
 }

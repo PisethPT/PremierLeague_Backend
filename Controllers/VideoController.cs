@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PremierLeague_Backend.Data.Repositories.Interfaces;
 using PremierLeague_Backend.Helper;
@@ -8,6 +10,7 @@ using PremierLeague_Backend.Models.ViewModels;
 
 namespace PremierLeague_Backend.Controllers
 {
+    [Authorize]
     [Route("en/videos")]
     public class VideoController : Controller
     {
@@ -25,14 +28,24 @@ namespace PremierLeague_Backend.Controllers
         }
 
         // GET: VideoController
-        public async Task<ActionResult> IndexAsync()
+        public async Task<ActionResult> IndexAsync(int page = 1)
         {
             try
             {
-                viewModel.VideoDetailDtos = await repository.GetAllVideosAsync();
+                int pageSize = 20;
+                viewModel.VideoDetailDtos = await repository.GetAllVideosAsync(page);
                 viewModel.SelectListItemClubs = await selectListItems.SelectListItemClubAsync();
                 viewModel.SelectListItemPlayers = await repository.GetAllPlayersAsync();
                 viewModel.selectListItemVideoTag = await selectListItems.SelectListItemsAsync("PL_CommandSelectListItemVideoTag");
+
+                int totalCount = await repository.GetVideoCountAsync();
+                int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalPages = totalPages;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalCount = totalCount;
+
                 return View(viewModel);
             }
             catch (Exception ex)
@@ -50,7 +63,7 @@ namespace PremierLeague_Backend.Controllers
         {
             try
             {
-                videoDto.Publisher = "12c64674-5ea2-484d-90b1-7419243b1758"; // TODO: Get user id from session
+                videoDto.Publisher = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "12c64674-5ea2-484d-90b1-7419243b1758"; // TODO: Get user id from session
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState
@@ -89,13 +102,13 @@ namespace PremierLeague_Backend.Controllers
         }
 
         // POST: VideoController/Update
-        [HttpPost("update")]
+        [HttpPost("update/{videoId:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> UpdateAsync(int videoId, VideoDto videoDto)
+        public async Task<ActionResult> UpdateAsync([FromRoute] int videoId, [FromForm] VideoDto videoDto)
         {
             try
             {
-                videoDto.Publisher = "12c64674-5ea2-484d-90b1-7419243b1758"; // TODO: Get user id from session
+                videoDto.Publisher = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "12c64674-5ea2-484d-90b1-7419243b1758"; // TODO: Get user id from session
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState
@@ -108,7 +121,7 @@ namespace PremierLeague_Backend.Controllers
                     throw new Exception($"Form validation failed: {string.Join(" | ", errors.Select(e => $"{e.Key}: {string.Join(", ", e.Value)}"))}");
                 }
 
-                if (!await repository.FindVideoExisting(videoDto))
+                if (!await repository.FindVideoExisting(videoDto, videoId))
                 {
                     ModelState.AddModelError(nameof(videoDto.Title), "A video with this title already exists.");
                     return RedirectToAction(nameof(Index));
@@ -123,7 +136,7 @@ namespace PremierLeague_Backend.Controllers
                 }
 
                 TempData["SuccessMessage"] = "Video updated successfully.";
-                return RedirectToAction(nameof(IndexAsync));
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
@@ -161,7 +174,7 @@ namespace PremierLeague_Backend.Controllers
                 }
 
                 TempData["SuccessMessage"] = "Video deleted successfully.";
-                return RedirectToAction(nameof(IndexAsync));
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {

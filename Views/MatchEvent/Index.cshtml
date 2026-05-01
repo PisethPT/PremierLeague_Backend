@@ -34,25 +34,6 @@
 }
 
 
-<div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden">
-    <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-4 w-full">
-        <div class="flex items-center justify-between lg:justify-start gap-4">
-            <a href="@Url.Action("Index", "Season")"
-                   class="inline-block bg-[#55005a] text-white px-4 py-2 hover:bg-[#410544] rounded-lg transition hover:ring-2 hover:!ring-[#8a3fbf] text-nowrap">
-                Back
-                to
-                Home
-            </a>
-
-            <button onclick="openModal('modal-8xl', true)"
-                    class="inline-block bg-[#8a3fbf] hover:bg-[#6b2fa0] text-white px-4 py-2 rounded-lg transition hover:ring-2 hover:!ring-[#8a3fbf] text-nowrap"
-                    id="btnAddNewSeason">
-                Add New
-            </button>
-        </div>
-    </div>
-</div>
-
 <div id="modalBackdrop" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
 
 <div id="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center m-4">
@@ -136,7 +117,7 @@
                                 </span>
                             </div>
                         </label>
-                    
+
                         <label class="flex flex-col gap-2 w-fit">
                             <span class="flex items-center gap-1">
                                 <span class="text-white font-medium">OwnGoal</span>
@@ -276,7 +257,7 @@
                                         class="bg-[#ffffff2b] text-white text-center text-sm px-3 py-1 rounded-2xl w-fit text-nowrap whitespace-nowrap">View
                                         stats <i class="fas fa-chevron-right !text-[8px]"></i>
                                     </button>
-                                    
+
                                 </div>
                                 <div class="flex justify-between items-end gap-1 h-full">
                                     <div class="flex flex-col justify-center gap-4">
@@ -310,10 +291,10 @@
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
-    <div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden h-fit max-h-[83vh]">
+    <div class="p-4 bg-[#37003c] rounded-lg shadow-lg space-y-4 overflow-hidden h-fit max-h-[90vh]">
         <h2 class="text-white text-md font-semibold uppercase">During Matches</h2>
         <div class="overflow-y-auto overflow-x-auto max-h-[78vh] scrollbar-none overflow-hidden rounded-t-lg">
-            <table class="min-w-full divide-y divide-[#55005a]">
+            <table class="min-w-full divide-y divide-[#55005a]" id="matchTableId">
                 <thead class="bg-[#55005a] sticky top-0 z-10">
                     <tr>
                         <th class="px-1 py-3 text-xs font-medium text-white uppercase tracking-wider text-center">
@@ -337,7 +318,7 @@
                     @foreach (var match in Model.MatchEventDuringMatchWeekDtos)
                     {
                         index++;
-                        <tr class="cursor-pointer">
+                        <tr class="cursor-pointer" onclick="handleRowClick(this, '@match.MatchId')">
                             <td class="px-1 py-4 whitespace-nowrap text-sm text-white">
                                 <div class="flex justify-center items-center">
                                     <div
@@ -415,9 +396,10 @@
             <div class="accordion-item">
                 <div onclick="toggleAccordion(this)"
                      class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
-                     <div class="relative">
+                    <div class="relative">
                         <span class="text-xs font-medium text-white uppercase tracking-wider">Top Stats</span>
-                        @* <span class="absolute -top-1 -right-5 inline-flex items-center justify-center px-1.5 py-[4px] text-[9px] font-semibold leading-none text-white bg-[#37003c] rounded-full">3</span> *@
+                        @* <span class="absolute -top-1 -right-5 inline-flex items-center justify-center px-1.5 py-[4px]
+                        text-[9px] font-semibold leading-none text-white bg-[#37003c] rounded-full">3</span> *@
                     </div>
                     <div class="flex items-center justify-center rounded-full bg-[#37003c] w-6 h-6">
                         <i class="fa-solid fa-chevron-down text-white text-xs transition-transform duration-300"></i>
@@ -509,128 +491,19 @@
                 </div>
             </div>
 
-            @foreach (var matchEventType in Model.MatchEventTypesDtos)
-            {
-                <div class="accordion-item">
-                    <div onclick="toggleAccordion(this)"
-                         class="min-w-full bg-[#55005a] flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer">
-                         <div class="relative">
-                        <span class="text-xs font-medium text-white uppercase tracking-wider">
-                            @matchEventType.EventTypeName
-                        </span>
-                            @* <span class="absolute -top-1 -right-5 inline-flex items-center justify-center px-1.5 py-[4px] text-[9px] font-semibold leading-none text-white bg-[#37003c] rounded-full">3</span> *@
-                        </div>
-                        <div class="flex items-center justify-center rounded-full bg-[#37003c] w-6 h-6">
-                            <i class="fa-solid fa-chevron-down text-white text-xs transition-transform duration-300"></i>
-                        </div>
-                    </div>
+            <div class="flex flex-col gap-2" id="matchEventTypesId">
+            </div>
 
-                    <div
-                        class="accordion-content overflow-hidden max-h-0 transition-all duration-300 divide-y divide-[#55005a]">
-                        @foreach (var matchEventDetail in Model.MatchEventDetailDtos.Where(x => x.EventTypeId == matchEventType.EventTypeId))
-                        {
-                            @if(matchEventDetail?.MatchEventId != 0) {
-                            <div class="p-3 flex flex-row justify-between">
-                                @if (matchEventDetail!.IsHomeClub)
-                                {
-                                    <div class="flex gap-4">
-                                        <div class="w-[4px] h-full rounded-r-md"
-                                             style="background-color: @(matchEventDetail.IsHomeClub ? matchEventDetail.ClubTheme : "transparent");">
-                                        </div>
-                                        <div class="flex gap-3">
-                                            <div class="relative inline-block">
-                                            <div class="relative inline-block overflow-hidden group rounded-xl">
-                                                <div class="flex justify-center pt-1 px-2">
-                                                    <img src="/upload/players/@matchEventDetail.Photo" alt="Player" class="h-14 w-auto object-cover relative z-20">
-                                                </div>
-                                                
-                                                <div class="absolute inset-0 rounded-xl bg-[rgba(118,4,131,0.3)] transition duration-200 z-10 cursor-pointer">
-                                                </div>
-                                                
-                                            </div>
-                                            <div class="absolute top-2 right-[-7px] bg-[rgba(118,4,131,0.5)] h-fit px-1 py-[2px] rounded-full z-30 flex justify-center items-center">
-                                                    <i class="fa-solid fa-futbol text-white text-xs"></i>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="text-white text-start font-bold">
-                                                <span class="text-white text-md font-normal">@matchEventDetail.FirstName </span>
-                                                <span class="text-white text-md font-bold">@matchEventDetail.LastName</span>
-                                                <div class="flex gap-2">
-                                                    <span class="text-gray-400 text-xs">@matchEventDetail.PlayerNumber • @matchEventDetail.Position</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex flex-col gap-4 justify-end">
-                                        <div class="text-gray-400 text-end font-bold">
-                                                @matchEventDetail.Minute"
-                                        </div>
-                                        <div class="flex justify-center items-center gap-1 cursor-pointer">
-                                            <div class="bg-red-700 flex justify-center items-center w-4 h-4 rounded-full">
-                                                <span class="text-white !text-[11px] font-bold">-</span>
-                                            </div>
-                                            <button onclick="toggleEditMatchEvent(@matchEventDetail.MatchEventId, @matchEventDetail.IsHomeClub.ToString().ToLower())" class="text-red-700 text-center text-sm font-thin hover:underline">Edit events</button>
-                                        </div>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="flex flex-col gap-4 justify-start">
-                                        <div class="text-gray-400 text-start font-bold"> @matchEventDetail.Minute"</div>
-                                        <div class="flex justify-center items-center gap-1 cursor-pointer">
-                                            <div class="bg-red-700 flex justify-center items-center w-4 h-4 rounded-full">
-                                                <span class="text-white !text-[11px] font-bold">-</span>
-                                            </div>
-                                            <button onclick="toggleEditMatchEvent(@matchEventDetail.MatchEventId, @matchEventDetail.IsHomeClub.ToString().ToLower())" class="text-red-700 text-center text-sm font-thin hover:underline">Edit events</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex gap-4">
-                                        <div class="flex gap-3">
-                                            <div class="text-white text-start font-bold">
-                                                    <span class="text-white text-md font-normal">@matchEventDetail.FirstName </span>
-                                                    <span class="text-white text-md font-bold">@matchEventDetail.LastName</span>
-                                                    <div class="flex gap-2 justify-end">
-                                                        <span class="text-gray-400 text-xs">@matchEventDetail.PlayerNumber • @matchEventDetail.Position</span>
-                                                    </div>
-                                            </div>
-                                            <div class="relative inline-block">
-                                                <div class="absolute top-2 left-[-7px] bg-[rgba(118,4,131,0.5)] h-fit px-1 py-[2px] rounded-full z-30 flex justify-center items-center">
-                                                    <i class="fa-solid fa-futbol text-white text-xs"></i>
-                                                </div>
-                                            <div class="relative inline-block overflow-hidden group rounded-xl">
-                                                <div class="flex justify-center pt-1 px-2">
-                                                    <img src="/upload/players/@matchEventDetail.Photo" alt="Player" class="h-14 w-auto object-cover relative z-20">
-                                                </div>
-                                                <div class="absolute inset-0 rounded-xl bg-[rgba(118,4,131,0.3)] transition duration-200 z-10 cursor-pointer">
-                                                </div>
-                                            </div>
-                                            </div>
-                                        </div>
-                                        <div class="w-[4px] h-full rounded-l-md" style="background-color: @(matchEventDetail.IsHomeClub ? "transparent" : matchEventDetail.ClubTheme);">
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                            }
-                            else 
-                            {
-                                <div class="p-3 flex flex-row justify-between">
-                                    <div class="text-white text-start font-bold">No events added yet.</div>
-                                </div>
-                            }
-                        }
-                     </div>
-                </div>
+            @section Scripts {
+                <partial name="_ValidationScriptsPartial" />
+                <script src="/js/matchEvent/index.js" asp-append-version="true"></script>
             }
-        </div>
-    </div>
-</div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script src="/js/matchEvent/index.js" asp-append-version="true"></script>
-}
+            @section Styles{
+                <style>
+                    .active-row {
+                    background-color: rgba(138, 63, 191, 0.2);
+                    }
+                </style>
+            }
 

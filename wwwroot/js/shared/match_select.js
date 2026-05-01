@@ -33,8 +33,6 @@ export const MatchSelect = (function () {
 
   function createNode(select, cfg) {
     select.classList.add("hidden");
-
-    // const wrapper = document.createElement("label");
     const wrapper = document.createElement("div");
     wrapper.className = "relative flex flex-col gap-2";
 
@@ -62,13 +60,11 @@ export const MatchSelect = (function () {
     const awayBox = document.createElement("div");
     awayBox.className =
       "flex justify-center items-center w-10 h-10 rounded-xl hidden";
-
     const awayImg = document.createElement("img");
     awayImg.className = `${cfg.imgSize} object-contain`;
     awayBox.appendChild(awayImg);
 
     content.append(homeBox, label, awayBox);
-
     const arrow = document.createElement("span");
     arrow.textContent = "▼";
     arrow.className = "text-[8px]";
@@ -103,35 +99,20 @@ export const MatchSelect = (function () {
     ul.innerHTML = items
       .map(
         (it, i) => `
-<li data-idx="${i}" data-value="${escapeHtml(it.value)}"
-    class="px-3 py-2 cursor-pointer hover:bg-[#3a003c]
-    ${selectedValue === it.value ? "bg-[#55005a]" : ""}">
-
-  <div class="flex items-center justify-between gap-3">
-    <div class="flex justify-center items-center w-10 h-10 rounded-xl" style="background:${
-      it.homeTheme
-    }">
-      <img src="${it.homeImg}" class="${cfg.imgSize} object-contain"  />
-    </div>
-    <div class="flex-1 text-center truncate text-white">
-      ${escapeHtml(it.label)}
-    </div>
-    <div class="flex justify-center items-center w-10 h-10 rounded-xl" style="background:${
-      it.awayTheme
-    }">
-    <img src="${it.awayImg}" class="${cfg.imgSize} object-contain" />
-    </div>
-    
-  </div>
-
-  ${
-    it.subtitle
-      ? `<div class="text-xs text-gray-400 mt-1 text-center">${escapeHtml(
-          it.subtitle,
-        )}</div>`
-      : ""
-  }
-</li>`,
+        <li data-idx="${i}" data-value="${escapeHtml(String(it.value))}"
+            class="px-3 py-2 cursor-pointer hover:bg-[#3a003c]
+            ${selectedValue === it.value ? "bg-[#55005a]" : ""}">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex justify-center items-center w-10 h-10 rounded-xl" style="background:${it.homeTheme}">
+              <img src="${it.homeImg}" class="${cfg.imgSize} object-contain" />
+            </div>
+            <div class="flex-1 text-center truncate text-white">${escapeHtml(it.label)}</div>
+            <div class="flex justify-center items-center w-10 h-10 rounded-xl" style="background:${it.awayTheme}">
+              <img src="${it.awayImg}" class="${cfg.imgSize} object-contain" />
+            </div>
+          </div>
+          ${it.subtitle ? `<div class="text-xs text-gray-400 mt-1 text-center">${escapeHtml(it.subtitle)}</div>` : ""}
+        </li>`,
       )
       .join("");
   }
@@ -147,98 +128,98 @@ export const MatchSelect = (function () {
 
     renderList(ul, items, cfg, null);
 
-    function openPop() {
+    const openPop = () => {
       open = true;
       panel.classList.remove("hidden");
       btn.setAttribute("aria-expanded", "true");
-    }
-
-    function closePop() {
+    };
+    const closePop = () => {
       open = false;
       panel.classList.add("hidden");
       btn.setAttribute("aria-expanded", "false");
-    }
+    };
 
     btn.addEventListener("click", () => (open ? closePop() : openPop()));
 
     ul.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
       const li = e.target.closest("li");
       if (!li) return;
-
       const idx = Number(li.dataset.idx);
       const it = items[idx];
       if (!it) return;
 
-      selected = it;
+      applySelection(it);
+      closePop();
+    });
 
+    function applySelection(it) {
+      selected = it;
       label.textContent = it.label;
       homeBox.style.backgroundColor = it.homeTheme;
       awayBox.style.backgroundColor = it.awayTheme;
-
       homeImg.src = it.homeImg;
       awayImg.src = it.awayImg;
 
-      homeImg.classList.remove("hidden");
-      awayImg.classList.remove("hidden");
-
-      homeBox.classList.remove("hidden");
-      awayBox.classList.remove("hidden");
+      [homeBox, awayBox, homeImg, awayImg].forEach((el) =>
+        el.classList.remove("hidden"),
+      );
 
       selectEl.value = it.value;
       selectEl.dispatchEvent(new Event("change", { bubbles: true }));
-
-      panel.classList.remove("mt-[46px]");
-      panel.classList.add("mt-[60px]");
-
+      panel.classList.replace("mt-[46px]", "mt-[60px]");
       renderList(ul, items, cfg, it.value);
-
-      closePop();
-    });
+    }
 
     document.addEventListener("pointerdown", (e) => {
       if (!btn.contains(e.target) && !panel.contains(e.target)) closePop();
     });
 
     return {
+      setData(newData) {
+        const baseImgUrl = '/upload/clubs/';
+
+        selectEl.innerHTML = `<option value="">${cfg.placeholder}</option>`;
+
+
+        items = newData.map((item) => ({
+          value: item.matchId,
+          label: item.matchContent,
+          subtitle: item.matchSubContent,
+          homeImg: baseImgUrl + item.homeClubCrest,
+          awayImg: baseImgUrl + item.awayClubCrest,
+          homeTheme: item.homeTheme,
+          awayTheme: item.awayTheme,
+        }));
+
+        items.forEach((it) => {
+          const opt = new Option(it.label, it.value);
+          selectEl.add(opt);
+        });
+
+        this.reset();
+      },
       setValue(value) {
         const it = items.find((x) => x.value == value);
         if (!it) return false;
-        selected = it;
-        label.textContent = it.label;
-        homeImg.src = it.homeImg;
-        awayImg.src = it.awayImg;
-        homeBox.classList.remove("hidden");
-        awayBox.classList.remove("hidden");
-        selectEl.value = value;
+        applySelection(it);
         return true;
       },
       reset() {
         selected = null;
         label.textContent = cfg.placeholder;
-
-        homeBox.classList.add("hidden");
-        awayBox.classList.add("hidden");
-
+        [homeBox, awayBox].forEach((el) => el.classList.add("hidden"));
         homeImg.src = "";
         awayImg.src = "";
-
-        panel.classList.remove("mt-[60px]");
-        panel.classList.add("mt-[46px]");
-
+        panel.classList.replace("mt-[60px]", "mt-[46px]");
         selectEl.value = "";
-
         renderList(ul, items, cfg, null);
       },
     };
   }
 
-  function initAll(selector = ".js-match-select", options = {}) {
-    return [...document.querySelectorAll(selector)].map((s) =>
-      init(s, options),
-    );
-  }
-
-  return { init, initAll };
+  return {
+    init,
+    initAll: (selector, opts) =>
+      [...document.querySelectorAll(selector)].map((s) => init(s, opts)),
+  };
 })();

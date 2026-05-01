@@ -118,14 +118,13 @@ public class VideoRepository : IVideoRepository
         }
     }
 
-    public async Task<IEnumerable<VideoDetailDto>> GetAllVideosAsync(int? page = 1, int? pageSize = 20, CancellationToken ct = default)
+    public async Task<IEnumerable<VideoDetailDto>> GetAllVideosAsync(int? page = 1, CancellationToken ct = default)
     {
         try
         {
             var cmd = new SqlCommand();
             cmd.CommandText = GetAllVideosCommand;
             cmd.Parameters.AddWithValue("@Page", page);
-            cmd.Parameters.AddWithValue("@PageSize", pageSize);
             var rdr = await execute.ExecuteReaderAsync(cmd, ct);
             var videos = new List<VideoDetailDto>();
             do
@@ -164,29 +163,37 @@ public class VideoRepository : IVideoRepository
             cmd.Parameters.AddWithValue("@VideoId", videoId);
             var rdr = await execute.ExecuteReaderAsync(cmd);
             var video = new VideoDto();
-            do
+
+            if (rdr is not null)
             {
-                video = new VideoDto
+                do
                 {
-                    VideoId = rdr.SafeGetInt("VideoId"),
-                    Title = rdr.SafeGetString("Title"),
-                    Channel = rdr.SafeGetString("Channel"),
-                    Description = rdr.SafeGetString("Description"),
-                    ThumbnailUrl = rdr.SafeGetString("ThumbnailUrl"),
-                    VideoUrl = rdr.SafeGetString("VideoUrl"),
-                    VideoCategoryId = rdr.SafeGetInt("VideoCategoryId"),
-                    DurationSeconds = rdr.SafeGetDecimal("DurationSeconds"),
-                    Publisher = rdr.SafeGetString("Publisher"),
-                    PublishedDate = rdr.SafeGetDateTime("PublishedDate"),
-                    ExpiryDate = rdr.SafeGetDateTime("ExpiryDate"),
-                    MatchId = rdr.SafeGetInt("MatchId"),
-                    ClubId = rdr.SafeGetInt("ClubId"),
-                    PlayerId = rdr.SafeGetInt("PlayerId"),
-                    SeasonId = rdr.SafeGetInt("SeasonId"),
-                    IsFeatured = rdr.SafeGetBoolean("IsFeatured"),
-                    IsActive = rdr.SafeGetBoolean("IsActive")
-                };
-            } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
+                    video = new VideoDto
+                    {
+                        VideoId = rdr.SafeGetInt("VideoId"),
+                        Title = rdr.SafeGetString("Title"),
+                        Channel = rdr.SafeGetString("Channel"),
+                        Description = rdr.SafeGetString("Description"),
+                        ThumbnailUrl = rdr.SafeGetString("ThumbnailUrl"),
+                        VideoUrl = rdr.SafeGetString("VideoUrl"),
+                        ReferenceUrl = rdr.SafeGetString("ReferenceUrl"),
+                        VideoCategoryId = rdr.SafeGetInt("VideoCategoryId"),
+                        VideoTagId = rdr.SafeGetInt("VideoTagId"),
+                        DurationSeconds = rdr.SafeGetDecimal("DurationSeconds"),
+                        PublishedDate = rdr.SafeGetDateTime("PublishedDate"),
+                        ExpiryDate = rdr.SafeGetDateTime("ExpiryDate"),
+                        MatchId = rdr.SafeGetInt("MatchId"),
+                        ClubId = rdr.SafeGetInt("ClubId"),
+                        PlayerId = rdr.SafeGetInt("PlayerId"),
+                        SeasonId = rdr.SafeGetInt("SeasonId"),
+                        IsTheArchive = rdr.SafeGetBoolean("IsTheArchive"),
+                        IsStory = rdr.SafeGetBoolean("IsStory"),
+                        IsReference = rdr.SafeGetBoolean("IsReference"),
+                        IsFeatured = rdr.SafeGetBoolean("IsFeatured"),
+                        IsActive = rdr.SafeGetBoolean("IsActive")
+                    };
+                } while (await rdr.ReadAsync(ct).ConfigureAwait(false));
+            }
 
             return video;
         }
@@ -202,7 +209,8 @@ public class VideoRepository : IVideoRepository
         {
             var cmd = new SqlCommand();
             cmd.CommandText = CountVideosCommand;
-            return await execute.ExecuteScalarAsync<int>(cmd);
+            var rdr = await execute.ExecuteReaderAsync(cmd);
+            return rdr is not null ? rdr.GetInt32(rdr.GetOrdinal("TotalCount")) : 0;
         }
         catch (Exception ex)
         {
@@ -222,11 +230,15 @@ public class VideoRepository : IVideoRepository
             cmd.Parameters.AddWithValue("@Channel", videoDto.Channel);
             cmd.Parameters.AddWithValue("@ThumbnailUrl", videoDto.ThumbnailUrl);
             cmd.Parameters.AddWithValue("@VideoUrl", videoDto.VideoUrl);
+            cmd.Parameters.AddWithValue("@ReferenceUrl", videoDto.ReferenceUrl);
             cmd.Parameters.AddWithValue("@VideoCategoryId", videoDto.VideoCategoryId);
+            cmd.Parameters.AddWithValue("@VideoTagId", videoDto.VideoTagId);
             cmd.Parameters.AddWithValue("@DurationSeconds", videoDto.DurationSeconds);
             cmd.Parameters.AddWithValue("@Publisher", videoDto.Publisher);
             cmd.Parameters.AddWithValue("@PublishedDate", videoDto.PublishedDate);
             cmd.Parameters.AddWithValue("@ExpiryDate", videoDto.ExpiryDate);
+            cmd.Parameters.AddWithValue("@IsStory", videoDto.IsStory);
+            cmd.Parameters.AddWithValue("@IsReference", videoDto.IsReference);
             cmd.Parameters.AddWithValue("@IsFeatured", videoDto.IsFeatured);
             cmd.Parameters.AddWithValue("@IsActive", videoDto.IsActive);
             cmd.Parameters.AddWithValue("@MatchId", videoDto.MatchId);

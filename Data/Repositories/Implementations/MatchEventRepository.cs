@@ -216,13 +216,12 @@ public class MatchEventRepository : IMatchEventRepository
         }
     }
 
-    public async Task<IEnumerable<MatchEventTypesDto>> GetMatchEventTypesAsync(int? matchId, CancellationToken ct = default)
+    public async Task<IEnumerable<MatchEventTypesDto>> GetMatchEventTypesAsync(CancellationToken ct = default)
     {
         try
         {
             var cmd = new SqlCommand();
             cmd.CommandText = GetMatchEventTypesCommand;
-            cmd.Parameters.AddWithValue("@MatchId", matchId);
             var rdr = await execute.ExecuteReaderAsync(cmd);
             var matchEventTypes = new List<MatchEventTypesDto>();
             if (rdr is not null)

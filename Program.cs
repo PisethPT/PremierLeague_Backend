@@ -15,15 +15,18 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/en/auth/login";
         options.LogoutPath = "/en/auth/logout";
         options.AccessDeniedPath = "/en/auth/access-denied";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
         options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 
         // redirect to login automatically when cookie expires
         options.Events = new CookieAuthenticationEvents
         {
             OnRedirectToLogin = ctx =>
             {
-                // Keep default behavior OR customize
                 ctx.Response.Redirect(ctx.RedirectUri);
                 return Task.CompletedTask;
             }
@@ -65,11 +68,10 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
-// Use custom middleware BEFORE routing
 app.UseMiddleware<ValidateUserMiddleware>();
+app.MapControllers();
 
+app.MapStaticAssets();
 app.MapGet("/", context =>
 {
     context.Response.Redirect("/en/auth/login");

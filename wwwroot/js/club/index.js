@@ -9,26 +9,22 @@ const CLUB_ENDPOINT = {
   const form = document.getElementById("clubForm");
   const removeLogo = document.getElementById("removeLogo");
 
-  // remove button
   removeLogo.addEventListener("click", () => {
     resetFile();
   });
 
-  // reset form
   document.getElementById("resetBtn").addEventListener("click", () => {
     form.reset();
     form.querySelectorAll("input").forEach(
       (input) =>
         function () {
           if (input.name != "__RequestVerificationToken") input.value = "";
-        }
+        },
     );
     resetFile();
-    // reset color swatch to default
     resetColorPicker();
   });
 
-  // submit: simple client validation and demo output
   document.getElementById("clubForm").addEventListener("submit", (e) => {
     const form = e.target;
 
@@ -65,8 +61,12 @@ document.getElementById("btnAddNewClub").addEventListener("click", (e) => {
     (input) =>
       function () {
         if (input.name != "__RequestVerificationToken") input.value = "";
-      }
+      },
   );
+
+  $("#isAllTimePremierLeagueClub").prop("checked", false);
+  $("#isAllTimePremierLeagueClubHidden").val("false");
+
   resetColorPicker();
   $("#clubForm").attr("action", CLUB_ENDPOINT.CREATE_CLUB_ENDPOINT);
 });
@@ -77,13 +77,13 @@ function attachUpdateClub(clubId) {
     method: "POST",
     headers: {
       RequestVerificationToken: $(
-        'input[name="__RequestVerificationToken"]'
+        'input[name="__RequestVerificationToken"]',
       ).val(),
     },
     success: function (data) {
-      // Fill fields safely
       $("#clubId").val(data.id);
       $("#clubName").val(data.name ?? "");
+      $("#clubShortName").val(data.clubNameThirdChar ?? "");
       $("#founded").val(data.founded ?? "");
       $("#city").val(data.city ?? "");
       $("#stadium").val(data.stadium ?? "");
@@ -91,7 +91,14 @@ function attachUpdateClub(clubId) {
       $("#website").val(data.clubOfficialWebsite ?? "");
       $("#crest").val(data.crest ?? "");
 
-      // theme color picker + hex box
+      $("#isAllTimePremierLeagueClub").prop(
+        "checked",
+        data.isAllTimePremierLeagueClub,
+      );
+      $("#isAllTimePremierLeagueClubHidden").val(
+        data.isAllTimePremierLeagueClub ? "true" : "false",
+      );
+
       if (data.theme) {
         $("#themeColor").val(data.theme);
         $("#themeHex").val(data.theme);
@@ -100,15 +107,13 @@ function attachUpdateClub(clubId) {
         $("#themeHex").val("#55005a");
       }
 
-      // logo preview
       if (data.crest) {
-        const logoPath = "/upload/clubs/" + data.crest; // adjust your folder path
+        const logoPath = "/upload/clubs/" + data.crest;
         $("#filePreview").attr("src", logoPath);
         $("#fileName").text(data.crest);
         $("#previewArea").removeClass("hidden");
         $("#fileInput").attr("required", false);
       } else {
-        // reset preview
         $("#previewArea").addClass("hidden");
         $("#filePreview").attr("src", "");
         $("#fileName").text("");
@@ -116,8 +121,11 @@ function attachUpdateClub(clubId) {
       }
 
       $("#modalTitle").text("Update Club");
-      $("#clubForm").attr("action", CLUB_ENDPOINT.UPDATE_CLUB_ENDPOINT + "/" + data.id);
-      // Open modal after fill
+      $("#clubForm").attr(
+        "action",
+        CLUB_ENDPOINT.UPDATE_CLUB_ENDPOINT + "/" + data.id,
+      );
+
       openModal("modal-8xl", true);
     },
     error: function (err) {
@@ -126,3 +134,7 @@ function attachUpdateClub(clubId) {
     },
   });
 }
+
+$("#isAllTimePremierLeagueClub").on("change", function () {
+  $("#isAllTimePremierLeagueClubHidden").val(this.checked ? "true" : "false");
+});

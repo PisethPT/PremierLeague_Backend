@@ -3,9 +3,11 @@ using PremierLeague_Backend.Helper;
 using PremierLeague_Backend.Models.DTOs;
 using PremierLeague_Backend.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace epl_backend.Controllers
 {
+    [Authorize]
     [Route("en/players")]
     public class PlayerController : Controller
     {

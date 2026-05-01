@@ -20,10 +20,10 @@ public class VideoDto
     [Required(ErrorMessage = "Video Category ID is required")]
     public int VideoCategoryId { get; set; }
     public int? VideoTagId { get; set; }
-    [Required(ErrorMessage = "Published Date is required")]
     public string? Publisher { get; set; }
     [Required(ErrorMessage = "Duration is required")]
     public decimal DurationSeconds { get; set; }
+    [Required(ErrorMessage = "Published Date is required")]
     public DateTime PublishedDate { get; set; }
     [Required(ErrorMessage = "Expiry Date is required")]
     public DateTime ExpiryDate { get; set; }

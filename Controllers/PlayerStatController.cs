@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using PremierLeague_Backend.Data.Repositories.Interfaces;
 using PremierLeague_Backend.Models.ViewModels;
 using PremierLeague_Backend.Helper.SqlCommands;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PremierLeague_Backend.Controllers
 {
+    [Authorize]
     [Route("en/player-stats")]
     public class PlayerStatController : Controller
     {

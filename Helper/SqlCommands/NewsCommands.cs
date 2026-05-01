@@ -6,5 +6,7 @@ public static class NewsCommands
     public static string UpdateNewsCommand => "PL_UpdateNews";
     public static string DeleteNewsCommand => "PL_DeleteNews";
     public static string GetNewsByIdCommand => "PL_GetNewsById";
+    public static string FindNewsExistingCommand => "PL_FindNewsExisting";
     public static string GetAllNewsDetailCommand => "PL_GetAllNewsDetail";
+    public static string CountNewsCommand => "PL_CountNews";
 }

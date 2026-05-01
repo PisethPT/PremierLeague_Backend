@@ -48,17 +48,30 @@ namespace PremierLeague_Backend.Controllers
                 }
 
                 var user = await repository.FindByEmailAsync(userLoginDto.Email!);
+
                 if (user is not null && await repository.CheckPasswordAsync(user, userLoginDto.Password!))
                 {
+                    //  Check Lockout Status
+                    if (user.LockoutEnabled && user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+                    {
+                        ModelState.AddModelError(string.Empty, $"This account is locked until {user.LockoutEnd.Value.ToLocalTime():g}");
+                        return View(viewModel);
+                    }
+
+                    var refreshToken = Guid.NewGuid().ToString("N");
+                    var expiryDate = DateTime.UtcNow.AddDays(7); // Refresh token lasts longer than the cookie
+
+                    await repository.SaveRefreshTokenAsync(user.UserId!, refreshToken, expiryDate);
+
                     var roleDto = await repository.GetRolesAsync(user);
 
-                    // Build claims identity
                     var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, user.UserId!),
-                        new Claim(ClaimTypes.Name, user.Email!),
-                        new Claim(ClaimTypes.Email, user.Email!)
-                    };
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId!),
+                new Claim(ClaimTypes.Name, user.Email!),
+                new Claim(ClaimTypes.Email, user.Email!),
+                new Claim("RefreshToken", refreshToken) // Store token in claim for middleware to verify
+            };
 
                     foreach (var role in roleDto.Roles)
                     {
@@ -68,15 +81,17 @@ namespace PremierLeague_Backend.Controllers
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var principal = new ClaimsPrincipal(identity);
 
-                    // Sign in (issue auth cookie)
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = userLoginDto.RememberMe,
+                        AllowRefresh = true // Allows SlidingExpiration to work
+                    };
+
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         principal,
-                        new AuthenticationProperties
-                        {
-                            IsPersistent = userLoginDto.RememberMe,
-                            ExpiresUtc = DateTime.UtcNow.AddMinutes(30)
-                        });
+                        authProperties);
+
                     return RedirectToAction("Dashboard", "Home");
                 }
 
@@ -85,19 +100,33 @@ namespace PremierLeague_Backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred during login for email {Email}", userLoginDto.Email);
-                ModelState.AddModelError(string.Empty, "An error occurred while processing your request. Please try again later.");
+                _logger.LogError(ex, "Error during login for {Email}", userLoginDto.Email);
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
                 return View(viewModel);
             }
-
         }
-
+        [Authorize]
         [HttpPost("logout")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction(nameof(Login));
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var token = User.FindFirst("RefreshToken")?.Value;
+                if (userId != null && token != null)
+                {
+                    await repository.RevokeRefreshTokenAsync(userId);
+                }
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction(nameof(Login));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during logout");
+                return RedirectToAction("Index", "Home");
+            }
         }
 
         [HttpGet("access-denied")]
@@ -109,6 +138,7 @@ namespace PremierLeague_Backend.Controllers
             return View();
         }
 
+        [Authorize]
         [HttpPost("create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([FromForm] UserDto userDto)
@@ -158,6 +188,7 @@ namespace PremierLeague_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("update/{userId}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update([FromForm] UserDto userDto, [FromRoute] string userId)
@@ -210,6 +241,7 @@ namespace PremierLeague_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string userId)
@@ -243,6 +275,7 @@ namespace PremierLeague_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("get-user/{userId}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> FindUserByUserId([FromRoute] string userId)

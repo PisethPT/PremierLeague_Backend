@@ -88,6 +88,10 @@ const resetForm = () => {
   form.find("input").not("[name='__RequestVerificationToken']").val("");
   form.find("textarea").val("");
 
+  if (window.matchSelectInst) {
+    window.matchSelectInst.reset();
+  }
+
   form.find("select.js-custom-select").each(function () {
     const placeholder = $(this).data("placeholder") || "Please select";
     const $btn = $(this).parent().find("button");
@@ -161,6 +165,8 @@ function toggleEditNews(newsId) {
         form.find("#title").val(data.title);
         form.find("#subtitle").val(data.subtitle);
         form.find("#content").val(data.content);
+        form.find("#referenceUrl").val(data.referenceUrl);
+        form.find("#videoReferenceUrl").val(data.videoReferenceUrl);
 
         // Manually update counters for specific elements without events
         document
@@ -172,10 +178,35 @@ function toggleEditNews(newsId) {
           .find("#publishedDate")
           .val(publishedDate.toISOString().split("T")[0]);
         form.find("#expiryDate").val(expiryDate.toISOString().split("T")[0]);
-        window.selectNewsTagInst.setValue(data.newsTagId);
-        form.find("#imageUrl").val(data.imageUrl);
-        //window.selectMatchInst.setValue(data.matchId);
 
+        $("#isFeatured").prop("checked", data.isFeatured);
+        $("#isFeaturedHidden").val(data.isFeatured ? "true" : "false");
+
+        $("#isActive").prop("checked", data.isActive);
+        $("#isActiveHidden").val(data.isActive ? "true" : "false");
+
+        $("#isVideo").prop("checked", data.isVideo);
+        $("#isVideoHidden").val(data.isVideo ? "true" : "false");
+
+        $("#isQuizzes").prop("checked", data.isQuizzes);
+        $("#isQuizzesHidden").val(data.isQuizzes ? "true" : "false");
+
+        $("#isRelatedContent").prop("checked", data.isRelatedContent);
+        $("#isRelatedContentHidden").val(
+          data.isRelatedContent ? "true" : "false",
+        );
+
+        $("#isPremierLeagueGame").prop("checked", data.isPremierLeagueGame);
+        $("#isPremierLeagueGameHidden").val(
+          data.isPremierLeagueGame ? "true" : "false",
+        );
+
+        window.selectNewsTagInst.setValue(data.newsTagId);
+        window.selectMatchInst.setValue(data.matchId);
+        window.selectClubInst.setValue(data.clubId);
+        window.selectNewsCategoryInst.setValue(data.newsCategoryId);
+
+        form.find("#imageUrl").val(data.imageUrl);
         if (data.imageUrl) {
           const photoPath = "/upload/news/" + data.imageUrl;
           $("#filePreview").attr("src", photoPath);

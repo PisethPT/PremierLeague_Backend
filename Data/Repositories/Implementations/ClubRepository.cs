@@ -1,6 +1,7 @@
 using System.Data;
 using System.Data.SqlClient;
 using PremierLeague_Backend.Data.Repositories.Interfaces;
+using PremierLeague_Backend.Helper;
 using PremierLeague_Backend.Models.DTOs;
 using static PremierLeague_Backend.Helper.SqlCommands.ClubCommands;
 
@@ -37,6 +38,7 @@ public class ClubRepository : IClubRepository
         cmd.CommandText = AddClubCommand;
 
         cmd.Parameters.AddWithValue("@Name", club.Name ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@ClubNameThirdChar", club.ClubNameThirdChar ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@Founded", club.Founded ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@City", club.City ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@Stadium", club.Stadium ?? (object)DBNull.Value);
@@ -44,6 +46,7 @@ public class ClubRepository : IClubRepository
         cmd.Parameters.AddWithValue("@ClubOfficialWebsite", club.ClubOfficialWebsite ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@Crest", club.Crest ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@Theme", club.Theme ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@IsAllTimePremierLeagueClub", club.IsAllTimePremierLeagueClub);
 
         try
         {
@@ -57,7 +60,7 @@ public class ClubRepository : IClubRepository
             return false;
         }
     }
-    
+
     public async Task<bool> DeleteClubAsync(int id, CancellationToken ct = default)
     {
         await using var conn = await AppDbContext.Instance.GetOpenConnectionAsync(ct).ConfigureAwait(false);
@@ -97,7 +100,7 @@ public class ClubRepository : IClubRepository
         }
     }
 
-    public async Task<DataTable> GetAllCClubsTableAsync(CancellationToken ct = default)
+    public async Task<DataTable> GetAllClubsTableAsync(CancellationToken ct = default)
     {
         var table = new DataTable();
         await using var conn = await AppDbContext.Instance.GetOpenConnectionAsync(ct).ConfigureAwait(false);
@@ -111,13 +114,14 @@ public class ClubRepository : IClubRepository
         return table;
     }
 
-    public async Task<List<ClubDto>> GetAllClubsAsync(CancellationToken ct = default)
+    public async Task<List<ClubDto>> GetAllClubsAsync(int page = 1, CancellationToken ct = default)
     {
         var list = new List<ClubDto>();
         var table = new DataTable();
         await using var conn = await AppDbContext.Instance.GetOpenConnectionAsync(ct).ConfigureAwait(false);
         await using var cmd = conn.CreateCommand();
         cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("@Page", page);
         cmd.CommandText = GetAllClubsCommand;
 
         using var adapter = new SqlDataAdapter((SqlCommand)cmd);
@@ -131,13 +135,15 @@ public class ClubRepository : IClubRepository
                 {
                     Id = int.Parse(row["ClubId"].ToString() ?? "0"),
                     Name = row["ClubName"] == DBNull.Value ? string.Empty : Convert.ToString(row["ClubName"]),
+                    ClubNameThirdChar = row["ClubNameThirdChar"] == DBNull.Value ? string.Empty : Convert.ToString(row["ClubNameThirdChar"]),
                     Founded = row["Founded"] == DBNull.Value ? string.Empty : Convert.ToString(row["Founded"]),
                     City = row["City"] == DBNull.Value ? string.Empty : Convert.ToString(row["City"]),
                     Stadium = row["Stadium"] == DBNull.Value ? string.Empty : Convert.ToString(row["Stadium"]),
                     HeadCoach = row["HeadCoach"] == DBNull.Value ? string.Empty : Convert.ToString(row["HeadCoach"]),
                     ClubOfficialWebsite = row["ClubOfficialWebsite"] == DBNull.Value ? string.Empty : Convert.ToString(row["ClubOfficialWebsite"]),
                     Crest = row["Crest"] == DBNull.Value ? null : Convert.ToString(row["Crest"]),
-                    Theme = row["Theme"] == DBNull.Value ? null : Convert.ToString(row["Theme"])
+                    Theme = row["Theme"] == DBNull.Value ? null : Convert.ToString(row["Theme"]),
+                    IsAllTimePremierLeagueClub = row["IsAllTimePremierLeagueClub"] == DBNull.Value ? false : Convert.ToBoolean(row["IsAllTimePremierLeagueClub"])
                 };
                 list.Add(club);
             }
@@ -175,13 +181,15 @@ public class ClubRepository : IClubRepository
             {
                 Id = rdr.GetInt32(rdr.GetOrdinal("ClubId")),
                 Name = rdr.GetString(rdr.GetOrdinal("ClubName")),
-                Founded = rdr.GetInt32(rdr.GetOrdinal("Founded")).ToString(),
-                City = rdr.GetString(rdr.GetOrdinal("City")),
-                Stadium = rdr.GetString(rdr.GetOrdinal("Stadium")),
-                HeadCoach = rdr.GetString(rdr.GetOrdinal("HeadCoach")),
-                ClubOfficialWebsite = rdr.GetString(rdr.GetOrdinal("ClubOfficialWebsite")),
-                Crest = rdr.GetString(rdr.GetOrdinal("Crest")),
-                Theme = rdr.GetString(rdr.GetOrdinal("Theme")),
+                ClubNameThirdChar = rdr.SafeGetString("ClubNameThirdChar"),
+                Founded = rdr.SafeGetString("Founded"),
+                City = rdr.SafeGetString("City"),
+                Stadium = rdr.SafeGetString("Stadium"),
+                HeadCoach = rdr.SafeGetString("HeadCoach"),
+                ClubOfficialWebsite = rdr.SafeGetString("ClubOfficialWebsite"),
+                Crest = rdr.SafeGetString("Crest"),
+                Theme = rdr.SafeGetString("Theme"),
+                IsAllTimePremierLeagueClub = rdr.SafeGetBoolean("IsAllTimePremierLeagueClub")
             };
         }
 
@@ -232,6 +240,7 @@ public class ClubRepository : IClubRepository
 
         cmd.Parameters.AddWithValue("@ClubId", club.Id);
         cmd.Parameters.AddWithValue("@Name", club.Name ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@ClubNameThirdChar", club.ClubNameThirdChar ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@Founded", club.Founded ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@City", club.City ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@Stadium", club.Stadium ?? (object)DBNull.Value);
@@ -239,6 +248,7 @@ public class ClubRepository : IClubRepository
         cmd.Parameters.AddWithValue("@ClubOfficialWebsite", club.ClubOfficialWebsite ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@Crest", club.Crest ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@Theme", club.Theme ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@IsAllTimePremierLeagueClub", club.IsAllTimePremierLeagueClub);
 
         try
         {
@@ -251,5 +261,21 @@ public class ClubRepository : IClubRepository
         {
             return false;
         }
+    }
+
+    public async Task<int> GetCountAsync(CancellationToken ct = default)
+    {
+        await using var conn = await AppDbContext.Instance.GetOpenConnectionAsync(ct).ConfigureAwait(false);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.CommandText = "PL_CountClub";
+
+        await using var rdr = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+        if (await rdr.ReadAsync(ct).ConfigureAwait(false))
+        {
+            return rdr.SafeGetInt("TotalCount");
+        }
+
+        return 0;
     }
 }

@@ -4,9 +4,11 @@ using PremierLeague_Backend.Models.ViewModels;
 using PremierLeague_Backend.Helper.SqlCommands;
 using PremierLeague_Backend.Models.DTOs;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PremierLeague_Backend.Controllers
 {
+    [Authorize]
     [Route("en/match-events")]
     public class MatchEventController : Controller
     {
@@ -30,11 +32,11 @@ namespace PremierLeague_Backend.Controllers
             try
             {
                 viewModel.MatchEventDuringMatchWeekDtos = await repository.GetMatchEventDuringMatchWeekAsync(season, week, page);
-                viewModel.MatchEventTypesDtos = await repository.GetMatchEventTypesAsync(1);
 
                 viewModel.MatchEventTypesSelectListItem = await selectList.SelectListItemsAsync(SelectListItemCommands.CommandSelectListItemMatchEventType);
                 viewModel.MatchEventOutcomesSelectListItem = await selectList.SelectListItemsAsync(SelectListItemCommands.CommandSelectListItemMatchEventOutcome);
 
+                viewModel.MatchEventTypesDtos = await repository.GetMatchEventTypesAsync();
                 viewModel.MatchEventDetailDtos = await repository.GetMatchEventDetailByMatchIdAsync(1);
 
                 return View(viewModel);
@@ -113,7 +115,7 @@ namespace PremierLeague_Backend.Controllers
                 }
 
                 var isExistsMatchEvent = await repository.FindExistsMatchEventByMatchEventIdAsync(matchEventDto);
-                if(!isExistsMatchEvent)
+                if (!isExistsMatchEvent)
                 {
                     ModelState.AddModelError(string.Empty, "Unable to update match event already exists for the same match, club, player and minute.");
                     _logger.LogWarning("FindExistsMatchEventByMatchEventIdAsync returned {success} for match event {MatchId}", isExistsMatchEvent, matchEventDto.MatchId);
@@ -202,7 +204,7 @@ namespace PremierLeague_Backend.Controllers
                 });
             }
         }
-        
+
         // GET: MatchEventController/GetPlayerItems
         [HttpGet("get-players/{matchId:int}/{clubId:int}")]
         [ValidateAntiForgeryToken]
@@ -235,5 +237,38 @@ namespace PremierLeague_Backend.Controllers
                 });
             }
         }
+
+        // GET: MatchEventController/GetMatchEventByMatchId
+        [HttpGet("get-match-event-types/{matchId:int}")]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> GetMatchEventTypesByMatchIdAsync([FromRoute] int matchId)
+        {
+            try
+            {
+                var matchEvent = await repository.GetMatchEventTypesAsync();
+                var matchEventTypeDetail = await repository.GetMatchEventDetailByMatchIdAsync(matchId);
+                return Json(new
+                {
+                    StatusCode = 200,
+                    Message = "Commit Transaction Success.",
+                    Data = new
+                    {
+                        MatchEvent = matchEvent,
+                        MatchEventTypeDetail = matchEventTypeDetail,
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading match events with filters");
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return Json(new
+                {
+                    StatusCode = 400,
+                    Message = ex.Message,
+                });
+            }
+        }
+
     }
 }

@@ -2,9 +2,11 @@ using PremierLeague_Backend.Data.Repositories.Interfaces;
 using PremierLeague_Backend.Models.DTOs;
 using PremierLeague_Backend.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PremierLeague_Backend.Controllers
 {
+    [Authorize]
     [Route("en/seasons")]
     public class SeasonController : Controller
     {

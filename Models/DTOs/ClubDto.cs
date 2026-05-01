@@ -26,6 +26,10 @@ public class ClubDto
     [Required(ErrorMessage = "Theme color is required.")]
     public string? Theme { get; set; }
 
+    public string? ClubNameThirdChar { get; set; }
+
+    public bool IsAllTimePremierLeagueClub { get; set; } = false;
+
     [Required(ErrorMessage = "Please upload a crest image.")]
     public IFormFile? CrestFile { get; set; }
 }

@@ -16,35 +16,62 @@ public class ValidateUserMiddleware
 
     public async Task InvokeAsync(HttpContext context, IUserRepository repository)
     {
-        if (context.User.Identity?.IsAuthenticated == true)
+        var path = context.Request.Path.Value?.ToLower() ?? "";
+
+        // Skip static assets for performance
+        if (path.Contains("/css") || path.Contains("/js") || path.Contains("/lib") || path.Contains("/assets") || path.Contains("/upload"))
+        {
+            await _next(context);
+            return;
+        }
+
+        if (context.User.Identity?.IsAuthenticated != true)
+        {
+            // Redirect unauthenticated users
+            bool isAnonymousPage = path == "/en/auth/login" ||
+                                   path == "/en/auth/access-denied" ||
+                                   path == "/";
+
+            if (!isAnonymousPage)
+            {
+                context.Response.Redirect("/en/auth/login");
+                return;
+            }
+        }
+        else
         {
             var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var tokenFromCookie = context.User.FindFirst("RefreshToken")?.Value;
+
             if (!string.IsNullOrEmpty(userId))
             {
                 var user = await repository.FindUserByIdAsync(userId);
-                if (user != null)
-                {
-                    bool isLocked = user.LockoutEnabled
-                    && user.LockoutEnd.HasValue
-                    && user.LockoutEnd.Value > DateTimeOffset.UtcNow;
 
-                    if (isLocked)
-                    {
-                        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                        context.Response.Redirect("en/auth/login");
-                        return;
-                    }
-                }
-                else
+                bool isTokenValid = !string.IsNullOrEmpty(tokenFromCookie) &&
+                                    await repository.ValidateRefreshTokenAsync(userId, tokenFromCookie);
+
+                bool isInvalid = user == null ||
+                                 (user.LockoutEnabled && user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow) ||
+                                 !isTokenValid;
+
+                if (isInvalid)
                 {
-                    // User not found → logout
                     await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                    context.Response.Redirect("en/auth/login");
+
+                    // Provide a specific reason if token is the issue
+                    string reason = !isTokenValid ? "session_expired" : "locked";
+                    context.Response.Redirect($"/en/auth/login?status={reason}");
                     return;
                 }
             }
         }
 
         await _next(context);
+
+        // 404 Handling
+        if (context.Response.StatusCode == 404 && !context.Response.HasStarted)
+        {
+            context.Response.Redirect("/en/auth/access-denied");
+        }
     }
 }
